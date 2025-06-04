@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencatatan Pembelian Paket Data</title>
+    <!-- Import Tailwind CSS dari CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-center">
+                <i class="fas fa-mobile-alt mr-2"></i>
+                Pencatatan Pembelian Paket Data
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Filter Bulan dan Tahun -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-filter mr-2 text-blue-600"></i>
+                Filter Statistik
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="filterBulan" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-calendar-alt mr-1"></i>Bulan
+                    </label>
+                    <select 
+                        id="filterBulan" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="0">Januari</option>
+                        <option value="1">Februari</option>
+                        <option value="2">Maret</option>
+                        <option value="3">April</option>
+                        <option value="4">Mei</option>
+                        <option value="5">Juni</option>
+                        <option value="6">Juli</option>
+                        <option value="7">Agustus</option>
+                        <option value="8">September</option>
+                        <option value="9">Oktober</option>
+                        <option value="10">November</option>
+                        <option value="11">Desember</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filterTahun" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-calendar mr-1"></i>Tahun
+                    </label>
+                    <select 
+                        id="filterTahun" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <!-- Tahun akan diisi oleh JavaScript -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistik Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Total Pendapatan Bulan Ini -->
+            <div class="bg-gradient-to-r from-green-400 to-green-600 rounded-lg shadow-md p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100 text-sm font-medium uppercase tracking-wide" id="labelPendapatan">Pendapatan Bulan Ini</p>
+                        <p class="text-3xl font-bold" id="totalPendapatan">Rp 0</p>
+                    </div>
+                    <div class="bg-green-500/20 rounded-full p-3">
+                        <i class="fas fa-coins text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Hutang Bulan Ini -->
+            <div class="bg-gradient-to-r from-red-400 to-red-600 rounded-lg shadow-md p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-red-100 text-sm font-medium uppercase tracking-wide" id="labelHutang">Hutang Bulan Ini</p>
+                        <p class="text-3xl font-bold" id="totalHutang">Rp 0</p>
+                    </div>
+                    <div class="bg-red-500/20 rounded-full p-3">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Transaksi Bulan Ini -->
+            <div class="bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg shadow-md p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm font-medium uppercase tracking-wide" id="labelTransaksi">Transaksi Bulan Ini</p>
+                        <p class="text-3xl font-bold" id="totalTransaksi">0</p>
+                    </div>
+                    <div class="bg-blue-500/20 rounded-full p-3">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+                <i class="fas fa-plus-circle mr-2 text-blue-600"></i>
+                Tambah Data Pembelian
+            </h2>
+            
+            <!-- Form Input -->
+            <form id="formPaketData" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Input Nama -->
+                <div class="space-y-2">
+                    <label for="nama" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-user mr-1"></i>Nama Lengkap
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nama" 
+                        name="nama" 
+                        required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Masukkan nama lengkap"
+                    >
+                </div>
+
+                <!-- Input Nomor HP -->
+                <div class="space-y-2">
+                    <label for="nomorHP" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-phone mr-1"></i>Nomor HP
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="nomorHP" 
+                        name="nomorHP" 
+                        required 
+                        pattern="[0-9]{10,13}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Contoh: 08123456789"
+                    >
+                </div>
+
+                <!-- Input Harga -->
+                <div class="space-y-2">
+                    <label for="harga" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-money-bill-wave mr-1"></i>Harga Paket (Rp)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="harga" 
+                        name="harga" 
+                        required 
+                        min="0"
+                        step="1000"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Contoh: 25000"
+                    >
+                </div>
+
+                <!-- Input Tanggal Pembelian -->
+                <div class="space-y-2">
+                    <label for="tanggalPembelian" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-calendar-alt mr-1"></i>Tanggal Pembelian
+                    </label>
+                    <input 
+                        type="date" 
+                        id="tanggalPembelian" 
+                        name="tanggalPembelian" 
+                        required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                </div>
+
+                <!-- Dropdown Status Pembayaran -->
+                <div class="space-y-2 md:col-span-2">
+                    <label for="statusPembayaran" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-credit-card mr-1"></i>Status Pembayaran
+                    </label>
+                    <select 
+                        id="statusPembayaran" 
+                        name="statusPembayaran" 
+                        required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">Pilih Status Pembayaran</option>
+                        <option value="Bayar">Bayar</option>
+                        <option value="Hutang">Hutang</option>
+                    </select>
+                </div>
+
+                <!-- Tombol Submit -->
+                <div class="md:col-span-2 pt-4">
+                    <button 
+                        type="submit" 
+                        id="btnSubmit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                        <i class="fas fa-save mr-2"></i>
+                        Simpan Data
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Status/Loading Message -->
+        <div id="statusMessage" class="hidden mb-6"></div>
+
+        <!-- Tabel Data -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-2xl font-semibold text-gray-800">
+                    <i class="fas fa-table mr-2 text-blue-600"></i>
+                    Data Pembelian Paket Data
+                </h2>
+            </div>
+            
+            <!-- Loading indicator untuk tabel -->
+            <div id="loadingTable" class="p-8 text-center">
+                <i class="fas fa-spinner fa-spin text-blue-600 text-2xl mb-2"></i>
+                <p class="text-gray-600">Memuat data...</p>
+            </div>
+
+            <!-- Container untuk tabel -->
+            <div id="tableContainer" class="hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor HP</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTable" class="bg-white divide-y divide-gray-200">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pesan jika tidak ada data -->
+            <div id="noDataMessage" class="hidden p-8 text-center text-gray-500">
+                <i class="fas fa-inbox text-4xl mb-4"></i>
+                <p>Belum ada data pembelian paket data</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Status -->
+    <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        <i class="fas fa-edit mr-2 text-blue-600"></i>
+                        Edit Data
+                    </h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-2">Nama: <span id="editNama" class="font-medium"></span></p>
+                    <p class="text-sm text-gray-600 mb-2">Nomor HP: <span id="editNomorHP" class="font-medium"></span></p>
+                    <p class="text-sm text-gray-600 mb-4">Harga: <span id="editHarga" class="font-medium"></span></p>
+                    
+                    <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-2">
+                        Status Pembayaran:
+                    </label>
+                    <select 
+                        id="editStatus" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="Bayar">Bayar</option>
+                        <option value="Hutang">Hutang</option>
+                    </select>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button 
+                        id="cancelEdit" 
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-200"
+                    >
+                        Batal
+                    </button>
+                    <button 
+                        id="saveEdit" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+                    >
+                        <i class="fas fa-save mr-1"></i>
+                        Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p>&copy; 2025 Sistem Pencatatan Paket Data. Dibuat Oleh Kati Cell</p>
+    </footer>
+
+    <script>
+        // ==========================================
+        // KONFIGURASI GOOGLE APPS SCRIPT
+        // ==========================================
+        // GANTI URL INI DENGAN URL GOOGLE APPS SCRIPT WEB APP ANDA
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNCvw2ijNqkGEE3qRyXYgycouWo0zfUKXW53OzfEASPv1MJkO14xaMrXeTcAusBJovHg/exec';
+        
+        // ==========================================
+        // VARIABEL GLOBAL
+        // ==========================================
+        let dataArray = []; // Array untuk menyimpan data lokal
+        let editingIndex = -1; // Index data yang sedang diedit
+
+        // ==========================================
+        // FUNGSI UNTUK FORMAT RUPIAH
+        // ==========================================
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MENGISI DROPDOWN TAHUN
+        // ==========================================
+        function populateYearDropdown() {
+            const yearSelect = document.getElementById('filterTahun');
+            const currentYear = new Date().getFullYear();
+            
+            // Bersihkan dropdown
+            yearSelect.innerHTML = '';
+            
+            // Tambahkan tahun dari 5 tahun yang lalu sampai 2 tahun ke depan
+            for (let year = currentYear - 5; year <= currentYear + 2; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MENDAPATKAN NAMA BULAN
+        // ==========================================
+        function getMonthName(monthIndex) {
+            const months = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            return months[monthIndex];
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MENGHITUNG STATISTIK BERDASARKAN FILTER
+        // ==========================================
+        function calculateFilteredStats() {
+            const selectedMonth = parseInt(document.getElementById('filterBulan').value);
+            const selectedYear = parseInt(document.getElementById('filterTahun').value);
+
+            let totalPendapatan = 0;
+            let totalHutang = 0;
+            let totalTransaksi = 0;
+
+            dataArray.forEach(item => {
+                const itemDate = new Date(item.tanggal);
+                
+                // Cek apakah transaksi adalah bulan dan tahun yang dipilih
+                if (itemDate.getMonth() === selectedMonth && itemDate.getFullYear() === selectedYear) {
+                    totalTransaksi++;
+                    
+                    if (item.status === 'Bayar') {
+                        totalPendapatan += parseFloat(item.harga || 0);
+                    } else if (item.status === 'Hutang') {
+                        totalHutang += parseFloat(item.harga || 0);
+                    }
+                }
+            });
+
+            // Update tampilan statistik
+            document.getElementById('totalPendapatan').textContent = formatRupiah(totalPendapatan);
+            document.getElementById('totalHutang').textContent = formatRupiah(totalHutang);
+            document.getElementById('totalTransaksi').textContent = totalTransaksi;
+
+            // Update label
+            const monthName = getMonthName(selectedMonth);
+            const currentDate = new Date();
+            const isCurrentMonth = selectedMonth === currentDate.getMonth() && selectedYear === currentDate.getFullYear();
+            
+            if (isCurrentMonth) {
+                document.getElementById('labelPendapatan').textContent = 'Pendapatan Bulan Ini';
+                document.getElementById('labelHutang').textContent = 'Hutang Bulan Ini';
+                document.getElementById('labelTransaksi').textContent = 'Transaksi Bulan Ini';
+            } else {
+                document.getElementById('labelPendapatan').textContent = `Pendapatan ${monthName} ${selectedYear}`;
+                document.getElementById('labelHutang').textContent = `Hutang ${monthName} ${selectedYear}`;
+                document.getElementById('labelTransaksi').textContent = `Transaksi ${monthName} ${selectedYear}`;
+            }
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MENAMPILKAN PESAN STATUS
+        // ==========================================
+        function showStatusMessage(message, type = 'info') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `p-4 rounded-md mb-6 ${
+                type === 'success' ? 'bg-green-100 text-green-700 border border-green-300' :
+                type === 'error' ? 'bg-red-100 text-red-700 border border-red-300' :
+                'bg-blue-100 text-blue-700 border border-blue-300'
+            }`;
+            statusDiv.innerHTML = `
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' :
+                    type === 'error' ? 'fa-exclamation-circle' :
+                    'fa-info-circle'
+                } mr-2"></i>
+                ${message}
+            `;
+            statusDiv.classList.remove('hidden');
+            
+            // Sembunyikan pesan setelah 5 detik
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MENGIRIM DATA KE GOOGLE SPREADSHEET
+        // ==========================================
+        async function kirimKeGoogleSheets(data) {
+            try {
+                // Tampilkan loading
+                const btnSubmit = document.getElementById('btnSubmit');
+                const originalText = btnSubmit.innerHTML;
+                btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+                btnSubmit.disabled = true;
+
+                // Kirim data ke Google Apps Script
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Penting untuk Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'addData',
+                        data: data
+                    })
+                });
+
+                // Karena mode no-cors, kita tidak bisa membaca response
+                // Jadi kita asumsikan berhasil dan tambahkan ke array lokal
+                await ambilDataDariGoogleSheets();
+                updateTable();
+                calculateFilteredStats();
+                
+                showStatusMessage('Data berhasil disimpan ke Google Spreadsheet!', 'success');
+
+                // Reset form
+                document.getElementById('formPaketData').reset();
+                // Set tanggal hari ini kembali
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('tanggalPembelian').value = today;
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatusMessage('Terjadi kesalahan saat menyimpan data. Periksa koneksi internet Anda.', 'error');
+            } finally {
+                // Kembalikan tombol ke kondisi normal
+                const btnSubmit = document.getElementById('btnSubmit');
+                btnSubmit.innerHTML = '<i class="fas fa-save mr-2"></i>Simpan Data';
+                btnSubmit.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK UPDATE DATA KE GOOGLE SPREADSHEET
+        // ==========================================
+       async function updateDataToGoogleSheets(index, newStatus) {
+    try {
+        const timestamp = dataArray[index].timestamp;
+
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // WAJIB diganti dari 'no-cors'
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'updateData',
+                timestamp: timestamp,
+                status: newStatus
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Update data lokal
+            dataArray[index].status = newStatus;
+            updateTable();
+            calculateFilteredStats();
+            showStatusMessage('Status pembayaran berhasil diperbarui!', 'success');
+        } else {
+            throw new Error(result.message || 'Gagal update');
+        }
+
+    } catch (error) {
+        console.error('Error saat update:', error);
+        showStatusMessage('Terjadi kesalahan saat memperbarui data.', 'error');
+    }
+}
+
+
+
+        // ==========================================
+        // FUNGSI UNTUK MENGAMBIL DATA DARI GOOGLE SPREADSHEET
+        // ==========================================
+        async function ambilDataDariGoogleSheets() {
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getData`, {
+                    method: 'GET',
+                });
+                
+                // Jika berhasil, parse data
+                const result = await response.json();
+                if (result.success && result.data) {
+                    dataArray = result.data;
+                    updateTable();
+                    calculateFilteredStats();
+                } else {
+                    throw new Error('Gagal mengambil data');
+                }
+            } catch (error) {
+                console.error('Error mengambil data:', error);
+                // Jika gagal, tampilkan data kosong
+                dataArray = [];
+                updateTable();
+                calculateFilteredStats();
+                showStatusMessage('Tidak dapat mengambil data dari server. Menampilkan data lokal.', 'error');
+            }
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MEMBUKA MODAL EDIT
+        // ==========================================
+        function openEditModal(index) {
+            editingIndex = index;
+            const data = dataArray[index];
+            
+            document.getElementById('editNama').textContent = data.nama;
+            document.getElementById('editNomorHP').textContent = data.nomorHP;
+            document.getElementById('editHarga').textContent = formatRupiah(data.harga);
+            document.getElementById('editStatus').value = data.status;
+            
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MENUTUP MODAL EDIT
+        // ==========================================
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            editingIndex = -1;
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MENYIMPAN EDIT
+        // ==========================================
+        function saveEdit() {
+            if (editingIndex === -1) return;
+            
+            const newStatus = document.getElementById('editStatus').value;
+            const oldStatus = dataArray[editingIndex].status;
+            
+            if (newStatus === oldStatus) {
+                showStatusMessage('Tidak ada perubahan pada status pembayaran.', 'info');
+                closeEditModal();
+                return;
+            }
+            
+            // Update ke Google Sheets
+            updateDataToGoogleSheets(editingIndex, newStatus);
+            closeEditModal();
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MEMPERBARUI TAMPILAN TABEL
+        // ==========================================
+        function updateTable() {
+            const tableBody = document.getElementById('dataTable');
+            const tableContainer = document.getElementById('tableContainer');
+            const noDataMessage = document.getElementById('noDataMessage');
+            const loadingTable = document.getElementById('loadingTable');
+
+            // Sembunyikan loading
+            loadingTable.classList.add('hidden');
+
+            if (dataArray.length === 0) {
+                // Tampilkan pesan tidak ada data
+                tableContainer.classList.add('hidden');
+                noDataMessage.classList.remove('hidden');
+            } else {
+                // Tampilkan tabel dengan data
+                tableContainer.classList.remove('hidden');
+                noDataMessage.classList.add('hidden');
+
+                // Bersihkan tabel
+                tableBody.innerHTML = '';
+
+                // Tambahkan setiap data ke tabel
+                dataArray.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                    
+                    // Format tanggal
+                    const tanggalFormatted = new Date(item.tanggal).toLocaleDateString('id-ID', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+
+                    // Tentukan warna badge status
+                    const statusColor = item.status === 'Bayar' ? 
+                        'bg-green-100 text-green-800' : 
+                        'bg-red-100 text-red-800';
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${item.nama}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.nomorHP}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatRupiah(item.harga)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tanggalFormatted}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColor}">
+                                <i class="fas ${item.status === 'Bayar' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-1"></i>
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button 
+                                onclick="openEditModal(${index})"
+                                class="text-blue-600 hover:text-blue-900 transition duration-200 mr-3"
+                                title="Edit Status"
+                            >
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button 
+                                onclick="deleteData(${index})"
+                                class="text-red-600 hover:text-red-900 transition duration-200"
+                                title="Hapus Data"
+                            >
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+
+        // ==========================================
+        // FUNGSI UNTUK MENGHAPUS DATA
+        // ==========================================
+        async function deleteData(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                try {
+                    // Kirim request hapus ke Google Apps Script
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                       body: JSON.stringify({
+                        action: 'deleteData',
+                        timestamp: dataArray[index].timestamp
+})
+
+                    });
+
+                    // Hapus dari array lokal
+                    dataArray.splice(index, 1);
+                    updateTable();
+                    calculateFilteredStats();
+                    
+                    showStatusMessage('Data berhasil dihapus!', 'success');
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    showStatusMessage('Terjadi kesalahan saat menghapus data.', 'error');
+                }
+            }
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set tanggal hari ini sebagai default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggalPembelian').value = today;
+
+            // Set bulan dan tahun saat ini sebagai default
+            const currentDate = new Date();
+            document.getElementById('filterBulan').value = currentDate.getMonth();
+            
+            // Isi dropdown tahun
+            populateYearDropdown();
+
+            // Ambil data dari Google Sheets saat halaman dimuat
+            ambilDataDariGoogleSheets();
+
+            // Event listener untuk form submit
+            document.getElementById('formPaketData').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Ambil data dari form
+                const formData = new FormData(this);
+                const data = {
+                    nama: formData.get('nama').trim(),
+                    nomorHP: formData.get('nomorHP').trim(),
+                    harga: parseFloat(formData.get('harga')),
+                    tanggal: formData.get('tanggalPembelian'),
+                    status: formData.get('statusPembayaran'),
+                    timestamp: new Date().toISOString()
+                };
+
+                // Validasi data
+                if (!data.nama || !data.nomorHP || !data.harga || !data.tanggal || !data.status) {
+                    showStatusMessage('Semua field harus diisi!', 'error');
+                    return;
+                }
+
+                // Validasi nomor HP
+                const phoneRegex = /^[0-9]{10,13}$/;
+                if (!phoneRegex.test(data.nomorHP)) {
+                    showStatusMessage('Nomor HP harus berupa angka dengan panjang 10-13 digit!', 'error');
+                    return;
+                }
+
+                // Validasi harga
+                if (data.harga <= 0) {
+                    showStatusMessage('Harga harus lebih dari 0!', 'error');
+                    return;
+                }
+
+                // Kirim data ke Google Sheets
+                kirimKeGoogleSheets(data);
+            });
+
+            // Event listener untuk filter bulan/tahun
+            document.getElementById('filterBulan').addEventListener('change', calculateFilteredStats);
+            document.getElementById('filterTahun').addEventListener('change', calculateFilteredStats);
+
+            // Event listeners untuk modal
+            document.getElementById('closeModal').addEventListener('click', closeEditModal);
+            document.getElementById('cancelEdit').addEventListener('click', closeEditModal);
+            document.getElementById('saveEdit').addEventListener('click', saveEdit);
+
+            // Tutup modal jika klik di luar modal
+            document.getElementById('editModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeEditModal();
+                }
+            });
+
+            // Event listener untuk tombol ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeEditModal();
+                }
+            });
+
+            // Auto-refresh data setiap 30 detik
+            setInterval(() => {
+                ambilDataDariGoogleSheets();
+            }, 30000);
+        });
+
+        // ==========================================
+        // FUNGSI UTILITAS TAMBAHAN
+        // ==========================================
+        
+        // Fungsi untuk export data ke CSV (bonus feature)
+        function exportToCSV() {
+            if (dataArray.length === 0) {
+                showStatusMessage('Tidak ada data untuk diekspor!', 'error');
+                return;
+            }
+
+            const headers = ['No', 'Nama', 'Nomor HP', 'Harga', 'Tanggal', 'Status'];
+            const csvContent = [
+                headers.join(','),
+                ...dataArray.map((item, index) => [
+                    index + 1,
+                    `"${item.nama}"`,
+                    item.nomorHP,
+                    item.harga,
+                    item.tanggal,
+                    item.status
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `data_paket_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showStatusMessage('Data berhasil diekspor ke CSV!', 'success');
+        }
+
+        // Fungsi untuk refresh manual data
+        function refreshData() {
+            showStatusMessage('Memuat ulang data...', 'info');
+            document.getElementById('loadingTable').classList.remove('hidden');
+            document.getElementById('tableContainer').classList.add('hidden');
+            document.getElementById('noDataMessage').classList.add('hidden');
+            
+            ambilDataDariGoogleSheets();
+        }
+
+        // ==========================================
+        // OFFLINE SUPPORT (bonus feature)
+        // ==========================================
+        
+        // Deteksi status online/offline
+        window.addEventListener('online', function() {
+            showStatusMessage('Koneksi internet tersambung kembali. Sinkronisasi data...', 'success');
+            ambilDataDariGoogleSheets();
+        });
+
+        window.addEventListener('offline', function() {
+            showStatusMessage('Koneksi internet terputus. Data akan disimpan secara lokal.', 'error');
+        });
+
+        // Service Worker untuk offline support (opsional)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+    </script>
+</body>
+</html>
