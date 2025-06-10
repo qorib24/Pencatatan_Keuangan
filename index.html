@@ -74,7 +74,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-green-100 text-sm font-medium uppercase tracking-wide" id="labelPendapatan">Pendapatan Bulan Ini</p>
-                        <p class="text-3xl font-bold" id="totalPendapatan">Rp 0</p>
+                        <p class="text-3xl font-bold cursor-pointer" id="totalPendapatan">Rp 0</p>
                     </div>
                     <div class="bg-green-500/20 rounded-full p-3">
                         <i class="fas fa-coins text-2xl"></i>
@@ -87,7 +87,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-red-100 text-sm font-medium uppercase tracking-wide" id="labelHutang">Hutang Bulan Ini</p>
-                        <p class="text-3xl font-bold" id="totalHutang">Rp 0</p>
+                        <p class="text-3xl font-bold cursor-pointer" id="totalHutang">Rp 0</p>
+
                     </div>
                     <div class="bg-red-500/20 rounded-full p-3">
                         <i class="fas fa-exclamation-triangle text-2xl"></i>
@@ -328,6 +329,8 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
+                <!-- Modal Daftar Pelanggan -->
+
                 
                 <div class="mb-4">
                     <p class="text-sm text-gray-600 mb-2">Nama: <span id="editNama" class="font-medium"></span></p>
@@ -365,6 +368,19 @@
         </div>
     </div>
 
+    <div id="statusListModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800" id="modalTitle">Daftar Pelanggan</h3>
+                    <button id="closeStatusListModal" class="text-gray-500 hover:text-gray-700">
+                     <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <div id="statusListContent" class="max-h-96 overflow-y-auto">
+      <!-- Daftar pelanggan akan muncul di sini -->
+            </div>
+        </div>
+    </div>
     <!-- Footer -->
     <footer class="bg-gray-800 text-white text-center py-6 mt-12">
         <p>&copy; 2025 Sistem Pencatatan Paket Data. Dibuat Oleh Kati Cell</p>
@@ -476,136 +492,165 @@
             }
         }
 
+         function showStatusList(status) {
+  const selectedMonth = parseInt(document.getElementById('filterBulan').value);
+  const selectedYear = parseInt(document.getElementById('filterTahun').value);
+
+  const listContainer = document.getElementById('statusListContent');
+  const modalTitle = document.getElementById('modalTitle');
+
+  // Filter data
+  const filtered = dataArray.filter(item => {
+    const date = new Date(item.tanggal);
+    return (
+      date.getMonth() === selectedMonth &&
+      date.getFullYear() === selectedYear &&
+      item.status === status
+    );
+  });
+
+  modalTitle.textContent = `Daftar Customer dengan Status "${status}"`;
+
+  if (filtered.length === 0) {
+    listContainer.innerHTML = `<p class="text-gray-500 text-center">Tidak ada data ${status.toLowerCase()} bulan ini.</p>`;
+  } else {
+    const listHTML = `
+      <table class="w-full text-sm text-left border">
+        <thead class="bg-gray-100 text-gray-600">
+          <tr>
+            <th class="py-2 px-3">No</th>
+            <th class="py-2 px-3">Nama</th>
+            <th class="py-2 px-3">Nomor HP</th>
+            <th class="py-2 px-3">Harga</th>
+            <th class="py-2 px-3">Tanggal</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map((item, i) => `
+            <tr class="border-t">
+              <td class="py-2 px-3">${i + 1}</td>
+              <td class="py-2 px-3">${item.nama}</td>
+              <td class="py-2 px-3">${item.nomorHP}</td>
+              <td class="py-2 px-3">${formatRupiah(item.harga)}</td>
+              <td class="py-2 px-3">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    listContainer.innerHTML = listHTML;
+  }
+
+  document.getElementById('statusListModal').classList.remove('hidden');
+}
+
        function createMonthlyChart() {
     const ctx = document.getElementById('monthlyChart').getContext('2d');
 
-    // Hapus chart yang sudah ada
     if (monthlyChart) {
         monthlyChart.destroy();
     }
 
-    // Ambil tahun saat ini secara otomatis
     const currentYear = new Date().getFullYear();
-
-    // Update label tahun di chart
     document.getElementById('chartYear').textContent = `Tahun ${currentYear}`;
 
-    // Inisialisasi data untuk 12 bulan
-    const buyersPerMonth = new Array(12).fill(0);
+    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const transaksiPerBulan = new Array(12).fill(0);
+    const pendapatanPerBulan = new Array(12).fill(0);
+    const hutangPerBulan = new Array(12).fill(0);
 
-    // Hitung jumlah pembeli per bulan
     dataArray.forEach(item => {
-        const itemDate = new Date(item.tanggal);
-        if (itemDate.getFullYear() === currentYear) {
-            const month = itemDate.getMonth();
-            buyersPerMonth[month]++;
+        const date = new Date(item.tanggal);
+        if (date.getFullYear() === currentYear) {
+            const month = date.getMonth();
+            transaksiPerBulan[month]++;
+            if (item.status === 'Bayar') {
+                pendapatanPerBulan[month] += parseFloat(item.harga || 0);
+            } else if (item.status === 'Hutang') {
+                hutangPerBulan[month] += parseFloat(item.harga || 0);
+            }
         }
     });
 
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-
-    // Buat chart hanya untuk jumlah pembeli
     monthlyChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: monthNames,
-            datasets: [{
-                label: 'Jumlah Pembeli',
-                data: buyersPerMonth,
-                backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                borderColor: 'rgba(59, 130, 246, 1)',
-                borderWidth: 2,
-                borderRadius: 8,
-                borderSkipped: false
-            }]
+            labels: monthLabels,
+            datasets: [
+                {
+                    label: 'Transaksi',
+                    backgroundColor: '#3b82f6',
+                    data: transaksiPerBulan
+                },
+                {
+                    label: 'Pendapatan',
+                    backgroundColor: '#10b981',
+                    data: pendapatanPerBulan
+                },
+                {
+                    label: 'Hutang',
+                    backgroundColor: '#ef4444',
+                    data: hutangPerBulan
+                }
+            ]
         },
         options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-        mode: 'index',
-        intersect: false
-    },
-    layout: {
-        padding: {
-            top: 10,
-            bottom: 10,
-            left: 10,
-            right: 10
-        }
-    },
-    plugins: {
-        legend: {
-            display: false
-        },
-        tooltip: {
-            backgroundColor: 'rgba(17, 24, 39, 0.95)',
-            titleColor: '#F9FAFB',
-            bodyColor: '#F9FAFB',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            borderWidth: 1,
-            cornerRadius: 12,
-            padding: 16,
-            titleFont: {
-                size: 14,
-                weight: 'bold'
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false
             },
-            bodyFont: {
-                size: 13
-            },
-            callbacks: {
-                label: function(context) {
-                    return `Pembeli: ${context.parsed.y} orang`;
-                }
-            }
-        }
-    },
-    scales: {
-        x: {
-            grid: { display: false },
-            ticks: {
-                color: '#6B7280',
-                font: {
-                    size: 12,
-                    weight: '500'
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 14,
+                        padding: 16,
+                        font: {
+                            size: 12
+                        }
+                    }
                 },
-                autoSkip: false,
-                maxRotation: 30,
-                minRotation: 15,
-                padding: 8
-            }
-        },
-        y: {
-            beginAtZero: true,
-            title: {
-                display: true,
-                text: 'Jumlah Pembeli',
-                color: '#374151',
-                font: {
-                    size: 12,
-                    weight: 'bold'
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            if (context.dataset.label === 'Pendapatan' || context.dataset.label === 'Hutang') {
+                                return `${context.dataset.label}: Rp ${value.toLocaleString('id-ID')}`;
+                            } else {
+                                return `${context.dataset.label}: ${value} transaksi`;
+                            }
+                        }
+                    }
                 }
             },
-            grid: {
-                color: 'rgba(156, 163, 175, 0.2)'
-            },
-            ticks: {
-                color: '#6B7280',
-                stepSize: 1,
-                callback: function(value) {
-                    return Math.floor(value) + ' orang';
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Jumlah',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Bulan',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
                 }
             }
         }
-    },
-    animation: {
-        duration: 1500,
-        easing: 'easeInOutQuart'
-    }
-}
-
     });
 }
+
 
 
         // ==========================================
@@ -669,6 +714,20 @@
             renderTable();
             calculateFilteredStats();
             createMonthlyChart();
+              // Event: klik pendapatan
+document.getElementById('totalPendapatan').addEventListener('click', () => {
+  showStatusList('Bayar');
+});
+
+// Event: klik hutang
+document.getElementById('totalHutang').addEventListener('click', () => {
+  showStatusList('Hutang');
+});
+
+// Event: tutup modal
+document.getElementById('closeStatusListModal').addEventListener('click', () => {
+  document.getElementById('statusListModal').classList.add('hidden');
+});
             return { success: true };
         } else {
             throw new Error(result.message || 'Gagal mengambil data');
