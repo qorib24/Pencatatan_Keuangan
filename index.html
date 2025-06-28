@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -109,6 +110,7 @@
                 </div>
             </div>
         </div>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
         <!-- Grafik Jumlah Pembeli Per Bulan -->
         <div class="bg-white rounded-xl shadow-lg p-8 mb-8 border border-gray-100">
@@ -126,18 +128,6 @@
     <canvas id="monthlyChart" class="w-full h-[300px] sm:h-[400px]"></canvas>
   </div>
 </div>
-
-
-                </div>
-            </div>
-            <!-- Legend Custom -->
-            <div class="mt-6 flex justify-center space-x-8">
-                <div class="flex items-center">
-                    <div class="w-4 h-4 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mr-2"></div>
-                    <span class="text-sm font-medium text-gray-700">Jumlah Pembeli</span>
-            </div>
-        </div>
-
         <!-- Form Section -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">
@@ -449,48 +439,57 @@
         // FUNGSI UNTUK MENGHITUNG STATISTIK BERDASARKAN FILTER
         // ==========================================
         function calculateFilteredStats() {
-            const selectedMonth = parseInt(document.getElementById('filterBulan').value);
-            const selectedYear = parseInt(document.getElementById('filterTahun').value);
+    const selectedMonth = parseInt(document.getElementById('filterBulan').value);
+    const selectedYear = parseInt(document.getElementById('filterTahun').value);
 
-            let totalPendapatan = 0;
-            let totalHutang = 0;
-            let totalTransaksi = 0;
+    let totalPendapatan = 0;
+    let totalHutang = 0;
+    let totalTransaksi = 0;
 
-            dataArray.forEach(item => {
-                const itemDate = new Date(item.tanggal);
-                
-                // Cek apakah transaksi adalah bulan dan tahun yang dipilih
-                if (itemDate.getMonth() === selectedMonth && itemDate.getFullYear() === selectedYear) {
-                    totalTransaksi++;
-                    
-                    if (item.status === 'Bayar') {
-                        totalPendapatan += parseFloat(item.harga || 0);
-                    } else if (item.status === 'Hutang') {
-                        totalHutang += parseFloat(item.harga || 0);
-                    }
-                }
-            });
+    // Reset filtered array
+    filteredDataArray = [];
 
-            // Update tampilan statistik
-            document.getElementById('totalPendapatan').textContent = formatRupiah(totalPendapatan);
-            document.getElementById('totalHutang').textContent = formatRupiah(totalHutang);
-            document.getElementById('totalTransaksi').textContent = totalTransaksi;
+    dataArray.forEach(item => {
+        const itemDate = new Date(item.tanggal);
 
-            // Update label
-            const monthName = getMonthName(selectedMonth);
-            const currentDate = new Date();
-            const isCurrentMonth = selectedMonth === currentDate.getMonth() && selectedYear === currentDate.getFullYear();
-            
-            if (isCurrentMonth) {
-                document.getElementById('labelPendapatan').textContent = 'Pendapatan Bulan Ini';
-                document.getElementById('labelHutang').textContent = 'Hutang Bulan Ini';
-                document.getElementById('labelTransaksi').textContent = 'Transaksi Bulan Ini';
-            } else {
-                document.getElementById('labelPendapatan').textContent = `Pendapatan ${monthName} ${selectedYear}`;
-                document.getElementById('labelHutang').textContent = `Hutang ${monthName} ${selectedYear}`;
-                document.getElementById('labelTransaksi').textContent = `Transaksi ${monthName} ${selectedYear}`;
+        // Cek apakah transaksi sesuai bulan & tahun yang dipilih
+        if (itemDate.getMonth() === selectedMonth && itemDate.getFullYear() === selectedYear) {
+            filteredDataArray.push(item); // Simpan untuk grafik & tabel
+            totalTransaksi++;
+
+            if (item.status === 'Bayar') {
+                totalPendapatan += parseFloat(item.harga || 0);
+            } else if (item.status === 'Hutang') {
+                totalHutang += parseFloat(item.harga || 0);
             }
         }
+    });
+
+    // Update nilai statistik ke tampilan
+    document.getElementById('totalPendapatan').textContent = formatRupiah(totalPendapatan);
+    document.getElementById('totalHutang').textContent = formatRupiah(totalHutang);
+    document.getElementById('totalTransaksi').textContent = totalTransaksi;
+
+    // Update label statistik
+    const monthName = getMonthName(selectedMonth);
+    const currentDate = new Date();
+    const isCurrentMonth = selectedMonth === currentDate.getMonth() && selectedYear === currentDate.getFullYear();
+
+    if (isCurrentMonth) {
+        document.getElementById('labelPendapatan').textContent = 'Pendapatan Bulan Ini';
+        document.getElementById('labelHutang').textContent = 'Hutang Bulan Ini';
+        document.getElementById('labelTransaksi').textContent = 'Transaksi Bulan Ini';
+    } else {
+        document.getElementById('labelPendapatan').textContent = `Pendapatan ${monthName} ${selectedYear}`;
+        document.getElementById('labelHutang').textContent = `Hutang ${monthName} ${selectedYear}`;
+        document.getElementById('labelTransaksi').textContent = `Transaksi ${monthName} ${selectedYear}`;
+    }
+
+    // 🟡 Penting: Update tabel & grafik berdasarkan data yang terfilter
+    renderTable();            // Tabel akan pakai filteredDataArray
+    createMonthlyChart();     // Grafik pakai filteredDataArray
+}
+
 
          function showStatusList(status) {
   const selectedMonth = parseInt(document.getElementById('filterBulan').value);
@@ -544,113 +543,91 @@
   document.getElementById('statusListModal').classList.remove('hidden');
 }
 
-       function createMonthlyChart() {
-    const ctx = document.getElementById('monthlyChart').getContext('2d');
+    function createMonthlyChart() {
+  const ctx = document.getElementById('monthlyChart').getContext('2d');
 
-    if (monthlyChart) {
-        monthlyChart.destroy();
-    }
+  // Hapus chart lama jika ada
+  if (monthlyChart) monthlyChart.destroy();
 
-    const currentYear = new Date().getFullYear();
-    document.getElementById('chartYear').textContent = `Tahun ${currentYear}`;
+  const pembeliCounts = {};
 
-    const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const transaksiPerBulan = new Array(12).fill(0);
-    const pendapatanPerBulan = new Array(12).fill(0);
-    const hutangPerBulan = new Array(12).fill(0);
+  // Gunakan data yang sudah difilter berdasarkan bulan/tahun
+  filteredDataArray.forEach(item => {
+    const nama = item.nama;
+    if (!pembeliCounts[nama]) pembeliCounts[nama] = 0;
+    pembeliCounts[nama]++;
+  });
 
-    dataArray.forEach(item => {
-        const date = new Date(item.tanggal);
-        if (date.getFullYear() === currentYear) {
-            const month = date.getMonth();
-            transaksiPerBulan[month]++;
-            if (item.status === 'Bayar') {
-                pendapatanPerBulan[month] += parseFloat(item.harga || 0);
-            } else if (item.status === 'Hutang') {
-                hutangPerBulan[month] += parseFloat(item.harga || 0);
-            }
-        }
-    });
+  // Urutkan dan ambil 7 pembeli terbanyak
+  const sorted = Object.entries(pembeliCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7);
 
-    monthlyChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: monthLabels,
-            datasets: [
-                {
-                    label: 'Transaksi',
-                    backgroundColor: '#3b82f6',
-                    data: transaksiPerBulan
-                },
-                {
-                    label: 'Pendapatan',
-                    backgroundColor: '#10b981',
-                    data: pendapatanPerBulan
-                },
-                {
-                    label: 'Hutang',
-                    backgroundColor: '#ef4444',
-                    data: hutangPerBulan
-                }
-            ]
+  const labels = sorted.map(([nama]) => nama);
+  const data = sorted.map(([_, count]) => count);
+
+  const colors = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+  monthlyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Jumlah Pembelian',
+        data: data,
+        backgroundColor: colors,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+
+      // ✅ Animasi
+      animation: {
+        duration: 1000,
+        easing: 'easeOutBounce'
+      },
+
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: context => `${context.label}: ${context.parsed.y} pembelian`
+          }
         },
-        options: {
-            responsive: true,
-            interaction: {
-                mode: 'index',
-                intersect: false
-            },
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 14,
-                        padding: 16,
-                        font: {
-                            size: 12
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const value = context.parsed.y;
-                            if (context.dataset.label === 'Pendapatan' || context.dataset.label === 'Hutang') {
-                                return `${context.dataset.label}: Rp ${value.toLocaleString('id-ID')}`;
-                            } else {
-                                return `${context.dataset.label}: ${value} transaksi`;
-                            }
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Jumlah',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        }
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Bulan',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        }
-                    }
-                }
-            }
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          font: { weight: 'bold' },
+          formatter: value => value
         }
-    });
-}
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Jumlah Pembelian',
+            font: { size: 14, weight: 'bold' }
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Nama Pembeli',
+            font: { size: 14, weight: 'bold' }
+          }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
 
+  // Update label judul grafik
+  const selectedMonth = parseInt(document.getElementById('filterBulan').value);
+  const selectedYear = parseInt(document.getElementById('filterTahun').value);
+  document.getElementById('chartYear').textContent = `Top 7 Pembeli - ${getMonthName(selectedMonth)} ${selectedYear}`;
+}
 
 
         // ==========================================
