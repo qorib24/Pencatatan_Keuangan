@@ -11,7 +11,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Import Chart.js untuk grafik -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Tambahkan ini di bagian <head> -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA8Hkwb-PYMeTdCwY0wfP3UVv7MFnGFZdE",
+    authDomain: "catatan-9a225.firebaseapp.com",
+    databaseURL: "https://catatan-9a225-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "catatan-9a225",
+    storageBucket: "catatan-9a225.appspot.com",
+    messagingSenderId: "989304269442",
+    appId: "1:989304269442:web:e90f948a5f8b2bd795a29b",
+    measurementId: "G-PCEN5GK1EM"
+  };
+
+  // Inisialisasi Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
 </head>
+<section id="dashboardSection">
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="bg-blue-600 text-white shadow-lg">
@@ -22,6 +43,7 @@
             </h1>
         </div>
     </header>
+    
 
     <!-- Main Container -->
     <div class="container mx-auto px-4 py-8 max-w-6xl">
@@ -67,6 +89,13 @@
                 </div>
             </div>
         </div>
+        <div class="flex justify-end mb-6">
+  <button onclick="showSection('data')"
+    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition duration-300">
+    <i class="fas fa-database mr-2"></i> Lihat Data Pembelian
+  </button>
+</div>
+
 
         <!-- Statistik Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -136,99 +165,88 @@
             </h2>
             
             <!-- Form Input -->
-            <form id="formPaketData" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Input Nama -->
-                <div class="space-y-2">
-                    <label for="nama" class="block text-sm font-medium text-gray-700">
-                        <i class="fas fa-user mr-1"></i>Nama Lengkap
-                    </label>
-                    <input 
-                        type="text" 
-                        id="nama" 
-                        name="nama" 
-                        required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Masukkan nama lengkap"
-                    >
-                </div>
+            <!-- Form Container yang responsif -->
+<!-- ✅ FORM TANPA GRID LUAR -->
+<div class="p-4">
+  <form id="formPaketData" class="flex flex-col gap-6">
 
-                <!-- Input Nomor HP -->
-                <div class="space-y-2">
-                    <label for="nomorHP" class="block text-sm font-medium text-gray-700">
-                        <i class="fas fa-phone mr-1"></i>Nomor HP
-                    </label>
-                    <input 
-                        type="tel" 
-                        id="nomorHP" 
-                        name="nomorHP" 
-                        required 
-                        pattern="[0-9]{10,13}"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Contoh: 08123456789"
-                    >
-                </div>
+    <!-- Input Nama -->
+    <div class="space-y-2">
+      <label for="nama" class="block text-sm font-medium text-gray-700">
+        <i class="fas fa-user mr-1"></i>Nama Lengkap
+      </label>
+      <input type="text" id="nama" name="nama" required placeholder="Contoh: Joko" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+    </div>
 
-                <!-- Input Harga -->
-                <div class="space-y-2">
-                    <label for="harga" class="block text-sm font-medium text-gray-700">
-                        <i class="fas fa-money-bill-wave mr-1"></i>Harga Paket (Rp)
-                    </label>
-                    <input 
-                        type="number" 
-                        id="harga" 
-                        name="harga" 
-                        required 
-                        min="0"
-                        step="1000"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Contoh: 25000"
-                    >
-                </div>
+    <!-- Input Nomor HP -->
+    <div class="space-y-2">
+      <label for="nomorHP" class="block text-sm font-medium text-gray-700">
+        <i class="fas fa-phone mr-1"></i>Nomor HP
+      </label>
+      <input type="tel" id="nomorHP" name="nomorHP" required pattern="[0-9]{10,13}" placeholder="Contoh: 081234567890" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+    </div>
 
-                <!-- Input Tanggal Pembelian -->
-                <div class="space-y-2">
-                    <label for="tanggalPembelian" class="block text-sm font-medium text-gray-700">
-                        <i class="fas fa-calendar-alt mr-1"></i>Tanggal Pembelian
-                    </label>
-                    <input 
-                        type="date" 
-                        id="tanggalPembelian" 
-                        name="tanggalPembelian" 
-                        required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                </div>
+    <!-- Dropdown Jenis Paket -->
+    <div class="space-y-2">
+      <label for="jenisPaket" class="block text-sm font-medium text-gray-700">
+        <i class="fas fa-box mr-1"></i>Jenis Paket
+      </label>
+      <select id="jenisPaket" name="jenisPaket" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+        <option value="">Pilih Jenis Paket</option>
+        <option value="VPN">VPN</option>
+        <option value="Reguler">Reguler</option>
+      </select>
+    </div>
 
-                <!-- Dropdown Status Pembayaran -->
-                <div class="space-y-2 md:col-span-2">
-                    <label for="statusPembayaran" class="block text-sm font-medium text-gray-700">
-                        <i class="fas fa-credit-card mr-1"></i>Status Pembayaran
-                    </label>
-                    <select 
-                        id="statusPembayaran" 
-                        name="statusPembayaran" 
-                        required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="">Pilih Status Pembayaran</option>
-                        <option value="Bayar">Bayar</option>
-                        <option value="Hutang">Hutang</option>
-                    </select>
-                </div>
+    <!-- Input Harga -->
+    <div class="space-y-2">
+      <label for="harga" class="block text-sm font-medium text-gray-700">
+        <i class="fas fa-money-bill-wave mr-1"></i>Harga Paket (Rp)
+      </label>
+      <input type="number" id="harga" name="harga" required min="0" step="1000" placeholder="Contoh: 25000" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+    </div>
 
-                <!-- Tombol Submit -->
-                <div class="md:col-span-2 pt-4">
-                    <button 
-                        type="submit" 
-                        id="btnSubmit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    >
-                        <i class="fas fa-save mr-2"></i>
-                        Simpan Data
-                    </button>
-                </div>
-            </form>
-        </div>
+    <!-- Input Tanggal -->
+    <div class="space-y-2">
+      <label for="tanggalPembelian" class="block text-sm font-medium text-gray-700">
+        <i class="fas fa-calendar-alt mr-1"></i>Tanggal Pembelian
+      </label>
+      <input type="date" id="tanggalPembelian" name="tanggalPembelian" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+    </div>
+
+    <!-- Status Pembayaran -->
+    <div class="space-y-2">
+      <label for="statusPembayaran" class="block text-sm font-medium text-gray-700">
+        <i class="fas fa-credit-card mr-1"></i>Status Pembayaran
+      </label>
+      <select id="statusPembayaran" name="statusPembayaran" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+        <option value="">Pilih Status Pembayaran</option>
+        <option value="Bayar">Bayar</option>
+        <option value="Hutang">Hutang</option>
+      </select>
+    </div>
+
+   <!-- Tombol Submit -->
+<div class="pt-4">
+  <button type="submit" id="btnSubmit" class="relative w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition duration-300 ease-in-out overflow-hidden">
+    <span id="btnText" class="flex items-center justify-center">
+      <i class="fas fa-save mr-2"></i>Simpan Data
+    </span>
+    <span id="btnLoading" class="hidden flex items-center justify-center">
+      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Menyimpan...
+    </span>
+  </button>
+</div>
+
+  </form>
+</div>
+</section>
+
+<section id="dataSection" style="display: none;">
 
         <!-- Status/Loading Message -->
         <div id="statusMessage" class="hidden mb-6"></div>
@@ -253,6 +271,11 @@
                     id="clearSearch" 
                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 hidden"
                 >
+                <div class="mt-3 flex items-center space-x-2">
+  <input type="checkbox" id="searchAll" class="form-checkbox text-blue-600">
+  <label for="searchAll" class="text-sm text-gray-700">Cari di semua data (abaikan filter bulan/tahun)</label>
+</div>
+
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -260,6 +283,14 @@
                 <span id="searchCount">0</span> hasil ditemukan
             </div>
         </div>
+<div class="bg-white rounded shadow p-4 mb-4 w-full max-w-xs mx-auto">
+  <h2 class="text-sm font-semibold text-gray-700 mb-2 text-center">
+    Statistik Paket
+  </h2>
+  <div class="w-full">
+    <canvas id="paketChart" class="w-full h-32"></canvas>
+  </div>
+</div>
 
         <!-- Tabel Data -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -269,7 +300,13 @@
                     Data Pembelian Paket Data
                 </h2>
             </div>
-            
+                <div class="flex justify-end mb-6">
+  <button onclick="showSection('dashboard')"
+    class="group inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800 font-semibold rounded-xl shadow-md hover:from-gray-300 hover:to-gray-400 transition-all duration-300 transform hover:-translate-y-1">
+    <i class="fas fa-chevron-left mr-2 group-hover:animate-pulse"></i>
+    <span>Kembali ke Dashboard</span>
+  </button>
+</div>      
             <!-- Loading indicator untuk tabel -->
             <div id="loadingTable" class="p-8 text-center">
                 <i class="fas fa-spinner fa-spin text-blue-600 text-2xl mb-2"></i>
@@ -285,6 +322,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor HP</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">jenis Paket</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -371,18 +409,13 @@
             </div>
         </div>
     </div>
+    </section>
     <!-- Footer -->
     <footer class="bg-gray-800 text-white text-center py-6 mt-12">
         <p>&copy; 2025 Sistem Pencatatan Paket Data. Dibuat Oleh Kati Cell</p>
     </footer>
 
     <script>
-        // ==========================================
-        // KONFIGURASI GOOGLE APPS SCRIPT
-        // ==========================================
-        // GANTI URL INI DENGAN URL GOOGLE APPS SCRIPT WEB APP ANDA
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNCvw2ijNqkGEE3qRyXYgycouWo0zfUKXW53OzfEASPv1MJkO14xaMrXeTcAusBJovHg/exec";
-        
         // ==========================================
         // VARIABEL GLOBAL
         // ==========================================
@@ -405,13 +438,14 @@
         // ==========================================
         // FUNGSI UNTUK MENGISI DROPDOWN TAHUN
         // ==========================================
-        function populateYearDropdown() {
+   
+function populateYearDropdown() {
     const yearSelect = document.getElementById('filterTahun');
     const currentYear = new Date().getFullYear();
-    
-    // Bersihkan dropdown
+
+    // Bersihkan dropdown tahun
     yearSelect.innerHTML = '';
-    
+
     // Tambahkan tahun dari 5 tahun yang lalu sampai 2 tahun ke depan
     for (let year = currentYear - 5; year <= currentYear + 2; year++) {
         const option = document.createElement('option');
@@ -422,7 +456,32 @@
         }
         yearSelect.appendChild(option);
     }
+
+    // Atur bulan sekarang ke dropdown bulan
+    document.getElementById('filterBulan').value = new Date().getMonth();
 }
+
+function loadDataFromFirebase() {
+    db.ref("pembelian").once("value").then(snapshot => {
+        dataArray = [];
+        snapshot.forEach(child => {
+            dataArray.push({ ...child.val(), key: child.key });
+        });
+        calculateFilteredStats(); // Tampilkan data setelah ambil
+    });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    populateYearDropdown(); // isi dropdown tahun & bulan
+
+    loadDataFromFirebase(); // ambil data dari Firebase
+    calculateFilteredStats(); // tampilkan statistik awal
+
+    // Aktifkan pemicu filter ketika user ganti bulan/tahun
+    document.getElementById('filterBulan').addEventListener('change', calculateFilteredStats);
+    document.getElementById('filterTahun').addEventListener('change', calculateFilteredStats);
+});
+
 
         // ==========================================
         // FUNGSI UNTUK MENDAPATKAN NAMA BULAN
@@ -520,20 +579,22 @@
             <th class="py-2 px-3">No</th>
             <th class="py-2 px-3">Nama</th>
             <th class="py-2 px-3">Nomor HP</th>
+            <th class="py-2 px-3">Jenis Paket</th>
             <th class="py-2 px-3">Harga</th>
             <th class="py-2 px-3">Tanggal</th>
           </tr>
         </thead>
         <tbody>
           ${filtered.map((item, i) => `
-            <tr class="border-t">
-              <td class="py-2 px-3">${i + 1}</td>
-              <td class="py-2 px-3">${item.nama}</td>
-              <td class="py-2 px-3">${item.nomorHP}</td>
-              <td class="py-2 px-3">${formatRupiah(item.harga)}</td>
-              <td class="py-2 px-3">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
-            </tr>
-          `).join('')}
+  <tr class="border-t">
+    <td class="py-2 px-3">${i + 1}</td>
+    <td class="py-2 px-3">${item.nama}</td>
+    <td class="py-2 px-3">${item.nomorHP}</td>
+    <td class="py-2 px-3">${item.jenisPaket || '-'}</td> <!-- ✅ Tambahan -->
+    <td class="py-2 px-3">${formatRupiah(item.harga)}</td>
+    <td class="py-2 px-3">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+  </tr>
+`).join('')}
         </tbody>
       </table>
     `;
@@ -633,147 +694,45 @@
         // ==========================================
         // FUNGSI UNTUK MENAMPILKAN STATUS MESSAGE
         // ==========================================
-        function showStatus(message, type = 'success') {
-            const statusDiv = document.getElementById('statusMessage');
-            statusDiv.className = `mb-6 p-4 rounded-md ${type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
-            statusDiv.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-2"></i>
-                    ${message}
-                </div>
-            `;
-            statusDiv.classList.remove('hidden');
-            
-            // Hilangkan status setelah 3 detik
-            setTimeout(() => {
-                statusDiv.classList.add('hidden');
-            }, 3000);
-        }
-
-        // ==========================================
-        // FUNGSI UNTUK SUBMIT DATA KE GOOGLE SHEETS
-        // ==========================================
-       async function submitToGoogleSheets(data) {
-    try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'add',
-                data: data
-            })
-        });
-
-        // Dengan no-cors, kita anggap berhasil jika tidak ada error
-        return { success: true, message: 'Data berhasil dikirim ke Google Sheets' };
-        
-    } catch (error) {
-        console.error('Error submitting to Google Sheets:', error);
-        return { success: false, message: 'Gagal mengirim data: ' + error.message };
-    }
-}
-
-        // ==========================================
-        // FUNGSI UNTUK MENGAMBIL DATA DARI GOOGLE SHEETS
-        // ==========================================
-       async function loadDataFromGoogleSheets() {
-    try {
-        // Untuk membaca data, kita HARUS bisa baca response, jadi tanpa no-cors
-        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`);
-        const result = await response.json();
-        
-        if (result.success) {
-            dataArray = result.data || [];
-            filteredDataArray = [...dataArray];
-            renderTable();
-            calculateFilteredStats();
-            createMonthlyChart();
-              // Event: klik pendapatan
-document.getElementById('totalPendapatan').addEventListener('click', () => {
-  showStatusList('Bayar');
-});
-
-// Event: klik hutang
-document.getElementById('totalHutang').addEventListener('click', () => {
-  showStatusList('Hutang');
-});
-
-// Event: tutup modal
-document.getElementById('closeStatusListModal').addEventListener('click', () => {
-  document.getElementById('statusListModal').classList.add('hidden');
-});
-            return { success: true };
-        } else {
-            throw new Error(result.message || 'Gagal mengambil data');
-        }
-    } catch (error) {
-        console.error('Error loading data from Google Sheets:', error);
-        // Jika gagal load dari server, coba load dari localStorage
-        const localData = loadFromLocalStorage();
-        if (localData.length > 0) {
-            dataArray = localData;
-            filteredDataArray = [...dataArray];
-            renderTable();
-            calculateFilteredStats();
-            createMonthlyChart();
-            showStatus('Data dimuat dari penyimpanan lokal', 'success');
-        }
-        return { success: false, message: error.message };
-    }
-}
-
-        // ==========================================
-        // FUNGSI UNTUK UPDATE DATA DI GOOGLE SHEETS
-        // ==========================================
-        async function updateDataInGoogleSheets(index, updatedData) {
-    try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'update',
-                index: index,
-                data: updatedData
-            })
-        });
-
-        return { success: true, message: 'Data berhasil diupdate' };
-        
-    } catch (error) {
-        console.error('Error updating data in Google Sheets:', error);
-        return { success: false, message: 'Gagal mengupdate data: ' + error.message };
-    }
-}
-
-        // ==========================================
-        // FUNGSI UNTUK HAPUS DATA DI GOOGLE SHEETS
-        // ==========================================
-        async function deleteDataFromGoogleSheets(index) {
-    try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'delete',
-                index: index
-            })
-        });
-
-        return { success: true, message: 'Data berhasil dihapus' };
-        
-    } catch (error) {
-        console.error('Error deleting data from Google Sheets:', error);
-        return { success: false, message: 'Gagal menghapus data: ' + error.message };
-    }
+       function showStatus(message, type = 'success') {
+    const statusDiv = document.getElementById('statusMessage');
+    
+    // Animasi masuk
+    const bgColor = type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+    const textColor = type === 'success' ? 'text-green-800' : 'text-red-800';
+    const icon = type === 'success' ? 'fa-check-circle text-green-500' : 'fa-exclamation-triangle text-red-500';
+    
+    statusDiv.className = `mb-6 p-4 rounded-lg border-2 ${bgColor} transform transition-all duration-500 ease-in-out`;
+    statusDiv.innerHTML = `
+        <div class="flex items-center animate-pulse">
+            <i class="fas ${icon} mr-3 text-xl"></i>
+            <div class="flex-1">
+                <p class="font-semibold ${textColor}">${message}</p>
+            </div>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    // Tampilkan dengan animasi slide down
+    statusDiv.classList.remove('hidden');
+    statusDiv.style.opacity = '0';
+    statusDiv.style.transform = 'translateY(-20px)';
+    
+    setTimeout(() => {
+        statusDiv.style.opacity = '1';
+        statusDiv.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // Auto hide setelah 4 detik dengan animasi fade out
+    setTimeout(() => {
+        statusDiv.style.opacity = '0';
+        statusDiv.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+            statusDiv.classList.add('hidden');
+        }, 500);
+    }, 4000);
 }
 
         // ==========================================
@@ -815,6 +774,8 @@ document.getElementById('closeStatusListModal').addEventListener('click', () => 
                         <div class="text-sm font-medium text-gray-900">${item.nama}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.nomorHP}</td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.jenisPaket || '-'}</td> <!-- ✅ Tambahan -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatRupiah(parseFloat(item.harga))}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -848,34 +809,62 @@ document.getElementById('closeStatusListModal').addEventListener('click', () => 
         // ==========================================
         // FUNGSI UNTUK PENCARIAN
         // ==========================================
-       function performSearch() {
+      function performSearch() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     const clearButton = document.getElementById('clearSearch');
     const searchResults = document.getElementById('searchResults');
     const searchCount = document.getElementById('searchCount');
-    const rows = document.querySelectorAll('#dataTable tr');
+    const searchAll = document.getElementById('searchAll').checked;
 
+    const targetArray = searchAll ? dataArray : filteredDataArray;
+
+    // Buat ulang isi tabel berdasarkan hasil pencarian
+    const tableBody = document.getElementById('dataTable');
+    tableBody.innerHTML = '';
     let count = 0;
-    rows.forEach(row => {
-        const nama = row.cells[1]?.textContent?.toLowerCase() || '';
-        const hp   = row.cells[2]?.textContent || '';
+
+    targetArray.forEach((item, index) => {
+        const nama = item.nama?.toLowerCase() || '';
+        const hp = item.nomorHP || '';
         if (nama.includes(searchTerm) || hp.includes(searchTerm)) {
-            row.style.display = '';
             count++;
-        } else {
-            row.style.display = 'none';
+
+            const row = document.createElement('tr');
+            const statusClass = item.status === 'Bayar' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            const statusIcon = item.status === 'Bayar' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+
+            row.innerHTML = `
+                <td class="px-6 py-4">${index + 1}</td>
+                <td class="px-6 py-4">${item.nama}</td>
+                <td class="px-6 py-4">${item.nomorHP}</td>
+                <td class="px-6 py-4">${item.jenisPaket || '-'}</td>
+                <td class="px-6 py-4">${formatRupiah(parseFloat(item.harga))}</td>
+                <td class="px-6 py-4">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                        <i class="fas ${statusIcon} mr-1"></i> ${item.status}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <button onclick="editData(${dataArray.indexOf(item)})" class="text-blue-600"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteData(${dataArray.indexOf(item)})" class="text-red-600 ml-2"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            tableBody.appendChild(row);
         }
     });
 
     if (searchTerm === '') {
         clearButton.classList.add('hidden');
         searchResults.classList.add('hidden');
+        calculateFilteredStats(); // Kembalikan tampilan normal
     } else {
         clearButton.classList.remove('hidden');
         searchResults.classList.remove('hidden');
         searchCount.textContent = count;
     }
 }
+
 
 
         // ==========================================
@@ -885,204 +874,212 @@ document.getElementById('closeStatusListModal').addEventListener('click', () => 
             document.getElementById('searchInput').value = '';
             performSearch();
         }
+function deleteData(index) {
+    const item = dataArray[index];
+    if (!item || !item.key) return;
+
+    if (confirm(`Yakin ingin menghapus data atas nama ${item.nama}?`)) {
+        db.ref("pembelian/" + item.key).remove()
+            .then(() => {
+                showStatus("🗑️ Data berhasil dihapus", "success");
+                loadDataFromFirebase();
+            })
+            .catch((error) => {
+                showStatus("❌ Gagal menghapus data: " + error.message, "error");
+            });
+    }
+}
 
         // ==========================================
         // FUNGSI UNTUK EDIT DATA
         // ==========================================
-        function editData(index) {
-            editingIndex = index;
-            const item = dataArray[index];
-            
-            // Isi modal dengan data
-            document.getElementById('editNama').textContent = item.nama;
-            document.getElementById('editNomorHP').textContent = item.nomorHP;
-            document.getElementById('editHarga').textContent = formatRupiah(parseFloat(item.harga));
-            document.getElementById('editStatus').value = item.status;
-            
-            // Tampilkan modal
-            document.getElementById('editModal').classList.remove('hidden');
-        }
+     function editData(index) {
+    editingIndex = index;
+    const item = dataArray[index];
 
-        // ==========================================
-        // FUNGSI UNTUK HAPUS DATA
-        // ==========================================
-        async function deleteData(index) {
-            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                const deleteBtn = event.target;
-                const originalContent = deleteBtn.innerHTML;
-                
-                // Tampilkan loading
-                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                deleteBtn.disabled = true;
+    // Isi modal
+    document.getElementById('editNama').textContent = item.nama;
+    document.getElementById('editNomorHP').textContent = item.nomorHP;
+    document.getElementById('editHarga').textContent = formatRupiah(parseFloat(item.harga));
+    document.getElementById('editStatus').value = item.status;
 
-                try {
-                    const result = await deleteDataFromGoogleSheets(index);
-                    
-                    if (result.success) {
-                        // Hapus dari array lokal
-                        dataArray.splice(index, 1);
-                        filteredDataArray = [...dataArray];
-                        
-                        // Update tampilan
-                        renderTable();
-                        calculateFilteredStats();
-                        createMonthlyChart();
-                        
-                        showStatus('Data berhasil dihapus!', 'success');
-                    } else {
-                        showStatus(result.message, 'error');
-                    }
-                } catch (error) {
-                    showStatus('Terjadi kesalahan saat menghapus data', 'error');
-                }
-                
-                // Kembalikan tombol
-                deleteBtn.innerHTML = originalContent;
-                deleteBtn.disabled = false;
-            }
-        }
+    // Tampilkan modal
+    document.getElementById('editModal').classList.remove('hidden');
+}
 
-        // ==========================================
-        // FUNGSI UNTUK SAVE EDIT
-        // ==========================================
-        async function saveEdit() {
-            const newStatus = document.getElementById('editStatus').value;
-            const saveBtn = document.getElementById('saveEdit');
-            const originalContent = saveBtn.innerHTML;
-            
-            // Tampilkan loading
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...';
-            saveBtn.disabled = true;
+// Fungsi untuk menyimpan hasil edit status ke Firebase
+document.getElementById("saveEdit").addEventListener("click", () => {
+    if (editingIndex < 0) return;
 
-            try {
-                const updatedData = {
-                    ...dataArray[editingIndex],
-                    status: newStatus
-                };
+    const item = dataArray[editingIndex];
+    const newStatus = document.getElementById("editStatus").value;
 
-                const result = await updateDataInGoogleSheets(editingIndex, updatedData);
-                
-                if (result.success) {
-                    // Update data lokal
-                    dataArray[editingIndex].status = newStatus;
-                    filteredDataArray = [...dataArray];
-                    
-                    // Update tampilan
-                    renderTable();
-                    calculateFilteredStats();
-                    createMonthlyChart();
-                    
-                    // Tutup modal
-                    document.getElementById('editModal').classList.add('hidden');
-                    
-                    showStatus('Data berhasil diupdate!', 'success');
-                } else {
-                    showStatus(result.message, 'error');
-                }
-            } catch (error) {
-                showStatus('Terjadi kesalahan saat mengupdate data', 'error');
-            }
-            
-            // Kembalikan tombol
-            saveBtn.innerHTML = originalContent;
-            saveBtn.disabled = false;
-        }
-
-        // ==========================================
-        // EVENT LISTENERS
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set tanggal hari ini sebagai default
-            document.getElementById('tanggalPembelian').value = new Date().toISOString().split('T')[0];
-            
-            // Set bulan dan tahun saat ini sebagai default untuk filter
-            const currentDate = new Date();
-            document.getElementById('filterBulan').value = currentDate.getMonth();
-            
-            // Isi dropdown tahun
-            populateYearDropdown();
-            
-            // Load data dari Google Sheets
-            loadDataFromGoogleSheets();
-
-            // Form submit event
-            document.getElementById('formPaketData').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(e.target);
-                const data = {
-                    nama: formData.get('nama'),
-                    nomorHP: formData.get('nomorHP'),
-                    harga: parseFloat(formData.get('harga')),
-                    tanggal: formData.get('tanggalPembelian'),
-                    status: formData.get('statusPembayaran')
-                };
-
-                const submitBtn = document.getElementById('btnSubmit');
-                const originalContent = submitBtn.innerHTML;
-                
-                // Tampilkan loading
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
-                submitBtn.disabled = true;
-
-                try {
-                    const result = await submitToGoogleSheets(data);
-                    
-                    if (result.success) {
-                        // Tambahkan ke array lokal
-                        dataArray.push(data);
-                        filteredDataArray = [...dataArray];
-                        
-                        // Update tampilan
-                        renderTable();
-                        calculateFilteredStats();
-                        createMonthlyChart();
-                        
-                        // Reset form
-                        e.target.reset();
-                        document.getElementById('tanggalPembelian').value = new Date().toISOString().split('T')[0];
-                        
-                        showStatus('Data berhasil disimpan!', 'success');
-                    } else {
-                        showStatus(result.message, 'error');
-                    }
-                } catch (error) {
-                    showStatus('Terjadi kesalahan saat menyimpan data', 'error');
-                }
-                
-                // Kembalikan tombol
-                submitBtn.innerHTML = originalContent;
-                submitBtn.disabled = false;
-            });
-
-            // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', performSearch);
-            
-            document.getElementById('clearSearch').addEventListener('click', clearSearch);
-
-            // Filter change events
-            document.getElementById('filterBulan').addEventListener('change', calculateFilteredStats);
-            document.getElementById('filterTahun').addEventListener('change', calculateFilteredStats);
-
-            // Modal events
-            document.getElementById('closeModal').addEventListener('click', function() {
-                document.getElementById('editModal').classList.add('hidden');
-            });
-            
-            document.getElementById('cancelEdit').addEventListener('click', function() {
-                document.getElementById('editModal').classList.add('hidden');
-            });
-            
-            document.getElementById('saveEdit').addEventListener('click', saveEdit);
-
-            // Close modal when clicking outside
-            document.getElementById('editModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.add('hidden');
-                }
-            });
+    db.ref("pembelian/" + item.key).update({ status: newStatus })
+        .then(() => {
+            showStatus("✅ Status berhasil diperbarui", "success");
+            document.getElementById("editModal").classList.add("hidden");
+            loadDataFromFirebase();
+        })
+        .catch((error) => {
+            showStatus("❌ Gagal memperbarui status: " + error.message, "error");
         });
-    </script>
+});
+
+// Fungsi untuk membatalkan edit
+
+document.getElementById("cancelEdit").addEventListener("click", () => {
+    document.getElementById("editModal").classList.add("hidden");
+});
+
+document.getElementById("closeModal").addEventListener("click", () => {
+    document.getElementById("editModal").classList.add("hidden");
+});
+//antar halaman
+function showSection(section) {
+    document.getElementById('dashboardSection').style.display = (section === 'dashboard') ? 'block' : 'none';
+    document.getElementById('dataSection').style.display = (section === 'data') ? 'block' : 'none';
+    
+    // ✅ Render chart ketika pindah ke halaman data
+    if (section === 'data') {
+        setTimeout(() => {
+            updateChart(dataArray);
+        }, 100); // Delay sedikit untuk memastikan DOM sudah ter-render
+    }
+}
+
+
+function loadDataFromFirebase() {
+    db.ref("pembelian").once("value").then(snapshot => {
+        dataArray = [];
+        snapshot.forEach(child => {
+            dataArray.push({ ...child.val(), key: child.key });
+        });
+        calculateFilteredStats(); // ini sudah ada di kodenya kamu
+    });
+}
+
+// Panggil saat halaman pertama kali dimuat
+window.addEventListener("DOMContentLoaded", () => {
+    populateYearDropdown(); // sudah ada di file kamu
+    loadDataFromFirebase(); // ambil data awal
+});
+
+document.getElementById("formPaketData").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    // Tampilkan loading state
+    const btnSubmit = document.getElementById("btnSubmit");
+    const btnText = document.getElementById("btnText");
+    const btnLoading = document.getElementById("btnLoading");
+    
+    // Disable button dan tampilkan loading
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add("cursor-not-allowed", "opacity-75");
+    btnText.classList.add("hidden");
+    btnLoading.classList.remove("hidden");
+
+    const nama = document.getElementById("nama").value;
+    const nomorHP = document.getElementById("nomorHP").value;
+    const jenisPaket = document.getElementById("jenisPaket").value;
+    const harga = document.getElementById("harga").value;
+    const tanggal = document.getElementById("tanggalPembelian").value;
+    const status = document.getElementById("statusPembayaran").value;
+
+    const newData = {
+        nama,
+        nomorHP,
+        jenisPaket,
+        harga,
+        tanggal,
+        status
+    };
+
+    const newKey = db.ref().child("pembelian").push().key;
+    
+    // Simulasi delay minimum untuk UX yang lebih baik
+    const minDelay = new Promise(resolve => setTimeout(resolve, 1000));
+    const firebasePromise = db.ref("pembelian/" + newKey).set(newData);
+    
+    Promise.all([minDelay, firebasePromise])
+        .then(() => {
+            // Reset button state
+            resetButtonState();
+            
+            // Tampilkan success dengan confetti effect
+            showStatus("🎉 Data berhasil disimpan! Selamat, transaksi baru telah ditambahkan.", "success");
+            
+            // Reset form dengan animasi
+            document.getElementById("formPaketData").reset();
+            
+            // Refresh data
+            loadDataFromFirebase();
+            
+            // Scroll ke atas untuk melihat notifikasi
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        })
+        .catch((error) => {
+            resetButtonState();
+            showStatus(`❌ Oops! Gagal menyimpan data: ${error.message}`, "error");
+        });
+    function resetButtonState() {
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("cursor-not-allowed", "opacity-75");
+        btnText.classList.remove("hidden");
+        btnLoading.classList.add("hidden");
+    }
+});
+
+// Ganti fungsi updateChart() dengan pengecekan visibility
+function updateChart(dataArray) {
+    const canvas = document.getElementById('paketChart');
+    
+    // ✅ Cek apakah canvas terlihat (misalnya saat halaman dibuka)
+    if (!canvas || canvas.offsetParent === null) return;
+
+    const countReguler = dataArray.filter(d => d.jenisPaket === "Reguler").length;
+    const countVPN = dataArray.filter(d => d.jenisPaket === "VPN").length;
+
+    const ctx = canvas.getContext('2d');
+    if (paketChart) paketChart.destroy();
+
+    paketChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Reguler', 'VPN'],
+            datasets: [{
+                data: [countReguler, countVPN],
+                backgroundColor: ['#6366F1', '#10B981'], // ungu & hijau
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // ❗ Supaya bisa kecil fleksibel
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            },
+            scales: {} // ✅ Ini membuatnya tanpa grid
+        }
+    });
+}
+   document.getElementById("searchInput").addEventListener("input", performSearch);
+document.getElementById("clearSearch").addEventListener("click", clearSearch);
+
+let paketChart = null;
+
+</script>
+
 </body>
 </html>
