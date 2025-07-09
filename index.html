@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -139,6 +140,20 @@
                 </div>
             </div>
         </div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+  <button onclick="tampilkanDaftarDashboard('Bayar')" class="bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-lg shadow">
+    <i class="fas fa-users mr-2"></i> Lihat Daftar Customer yang Bayar
+  </button>
+  <button onclick="tampilkanDaftarDashboard('Hutang')" class="bg-red-100 hover:bg-red-200 text-red-800 font-semibold py-2 px-4 rounded-lg shadow">
+    <i class="fas fa-users-slash mr-2"></i> Lihat Daftar Customer yang Hutang
+  </button>
+</div>
+
+<div id="listBayarDashboard" class="mt-6 hidden bg-white shadow rounded-lg p-4"></div>
+<!-- Wadah Daftar Customer Hutang -->
+<div id="listHutangDashboard" class="mt-6 hidden bg-white shadow rounded-lg p-4"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
         <!-- Grafik Jumlah Pembeli Per Bulan -->
@@ -241,7 +256,6 @@
     </span>
   </button>
 </div>
-
   </form>
 </div>
 </section>
@@ -267,14 +281,14 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
+                <input type="checkbox" id="searchAll" class="form-checkbox text-blue-600">
+  <label for="searchAll" class="text-sm text-gray-700">Cari di semua data (abaikan filter bulan/tahun)</label>
+</div>
                 <button 
                     id="clearSearch" 
                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 hidden"
                 >
                 <div class="mt-3 flex items-center space-x-2">
-  <input type="checkbox" id="searchAll" class="form-checkbox text-blue-600">
-  <label for="searchAll" class="text-sm text-gray-700">Cari di semua data (abaikan filter bulan/tahun)</label>
-</div>
 
                     <i class="fas fa-times"></i>
                 </button>
@@ -549,15 +563,14 @@ window.addEventListener("DOMContentLoaded", () => {
     createMonthlyChart();     // Grafik pakai filteredDataArray
 }
 
-
-         function showStatusList(status) {
+function showStatusList(status) {
   const selectedMonth = parseInt(document.getElementById('filterBulan').value);
   const selectedYear = parseInt(document.getElementById('filterTahun').value);
 
   const listContainer = document.getElementById('statusListContent');
   const modalTitle = document.getElementById('modalTitle');
 
-  // Filter data
+  // Filter data sesuai status dan bulan/tahun
   const filtered = dataArray.filter(item => {
     const date = new Date(item.tanggal);
     return (
@@ -586,15 +599,15 @@ window.addEventListener("DOMContentLoaded", () => {
         </thead>
         <tbody>
           ${filtered.map((item, i) => `
-  <tr class="border-t">
-    <td class="py-2 px-3">${i + 1}</td>
-    <td class="py-2 px-3">${item.nama}</td>
-    <td class="py-2 px-3">${item.nomorHP}</td>
-    <td class="py-2 px-3">${item.jenisPaket || '-'}</td> <!-- ✅ Tambahan -->
-    <td class="py-2 px-3">${formatRupiah(item.harga)}</td>
-    <td class="py-2 px-3">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
-  </tr>
-`).join('')}
+            <tr class="border-t">
+              <td class="py-2 px-3">${i + 1}</td>
+              <td class="py-2 px-3">${item.nama}</td>
+              <td class="py-2 px-3">${item.nomorHP}</td>
+              <td class="py-2 px-3">${item.jenisPaket || '-'}</td>
+              <td class="py-2 px-3">${formatRupiah(item.harga)}</td>
+              <td class="py-2 px-3">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+            </tr>
+          `).join('')}
         </tbody>
       </table>
     `;
@@ -603,6 +616,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById('statusListModal').classList.remove('hidden');
 }
+
+// Tutup modal saat tombol close ditekan
+document.getElementById("closeStatusListModal").addEventListener("click", () => {
+  document.getElementById("statusListModal").classList.add("hidden");
+});
 
     function createMonthlyChart() {
   const ctx = document.getElementById('monthlyChart').getContext('2d');
@@ -733,6 +751,61 @@ window.addEventListener("DOMContentLoaded", () => {
             statusDiv.classList.add('hidden');
         }, 500);
     }, 4000);
+}
+
+function tampilkanDaftarDashboard(status) {
+  const selectedMonth = parseInt(document.getElementById('filterBulan').value);
+  const selectedYear = parseInt(document.getElementById('filterTahun').value);
+
+  const filtered = dataArray.filter(item => {
+    const date = new Date(item.tanggal);
+    return (
+      date.getMonth() === selectedMonth &&
+      date.getFullYear() === selectedYear &&
+      item.status === status
+    );
+  });
+
+  const listHTML = `
+    <h3 class="text-lg font-semibold text-${status === 'Bayar' ? 'green' : 'red'}-700 mb-2">
+      Daftar Customer ${status} Bulan Ini
+    </h3>
+    ${filtered.length === 0 ? '<p class="text-gray-500 text-sm">Tidak ada data.</p>' : `
+      <table class="w-full text-sm text-left border">
+        <thead class="bg-gray-100 text-gray-600">
+          <tr>
+            <th class="py-2 px-3">No</th>
+            <th class="py-2 px-3">Nama</th>
+            <th class="py-2 px-3">HP</th>
+            <th class="py-2 px-3">Paket</th>
+            <th class="py-2 px-3">Harga</th>
+            <th class="py-2 px-3">Tanggal</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map((item, i) => `
+            <tr class="border-t">
+              <td class="py-2 px-3">${i + 1}</td>
+              <td class="py-2 px-3">${item.nama}</td>
+              <td class="py-2 px-3">${item.nomorHP}</td>
+              <td class="py-2 px-3">${item.jenisPaket || '-'}</td>
+              <td class="py-2 px-3">${formatRupiah(item.harga)}</td>
+              <td class="py-2 px-3">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    `}
+  `;
+
+  if (status === 'Bayar') {
+    document.getElementById('listBayarDashboard').innerHTML = listHTML;
+    document.getElementById('listBayarDashboard').classList.remove('hidden');
+    document.getElementById('listHutangDashboard').classList.add('hidden');
+  } else {
+    document.getElementById('listHutangDashboard').innerHTML = listHTML;
+    document.getElementById('listHutangDashboard').classList.remove('hidden');
+    document.getElementById('listBayarDashboard').classList.add('hidden');
+  }
 }
 
         // ==========================================
@@ -948,21 +1021,18 @@ function showSection(section) {
 }
 
 
-function loadDataFromFirebase() {
-    db.ref("pembelian").once("value").then(snapshot => {
-        dataArray = [];
-        snapshot.forEach(child => {
-            dataArray.push({ ...child.val(), key: child.key });
-        });
-        calculateFilteredStats(); // ini sudah ada di kodenya kamu
+function loadDataFromFirebase(callback) {
+  db.ref("pembelian").once("value").then(snapshot => {
+    dataArray = [];
+    snapshot.forEach(child => {
+      dataArray.push({ ...child.val(), key: child.key });
     });
+    calculateFilteredStats(); // untuk update statistik
+    if (typeof callback === 'function') {
+      callback(); // ini untuk menunggu sebelum tampilkan modal
+    }
+  });
 }
-
-// Panggil saat halaman pertama kali dimuat
-window.addEventListener("DOMContentLoaded", () => {
-    populateYearDropdown(); // sudah ada di file kamu
-    loadDataFromFirebase(); // ambil data awal
-});
 
 document.getElementById("formPaketData").addEventListener("submit", function(e) {
     e.preventDefault();
