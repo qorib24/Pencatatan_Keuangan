@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -93,12 +94,20 @@
                 </div>
             </div>
         </div>
-        <div class="flex justify-end mb-6">
-  <button onclick="showSection('data')"
-    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition duration-300">
+ <div class="flex flex-col md:flex-row justify-end gap-3 mt-4 mb-6">
+  <button 
+    onclick="hapusDataBulanIni()" 
+    class="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition duration-300 w-full md:w-auto">
+    <i class="fas fa-trash mr-2"></i> Hapus Semua Data Bulan Ini
+  </button>
+
+  <button 
+    onclick="showSection('data')" 
+    class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition duration-300 w-full md:w-auto">
     <i class="fas fa-database mr-2"></i> Lihat Data Pembelian
   </button>
 </div>
+
 
 
         <!-- Statistik Cards -->
@@ -153,9 +162,8 @@
   </button>
 </div>
 
-<div id="listBayarDashboard" class="mt-6 hidden bg-white shadow rounded-lg p-4"></div>
-<!-- Wadah Daftar Customer Hutang -->
-<div id="listHutangDashboard" class="mt-6 hidden bg-white shadow rounded-lg p-4"></div>
+<div id="listBayarDashboard" class="mt-6 hidden bg-white shadow rounded-lg p-4 overflow-x-auto"></div>
+<div id="listHutangDashboard" class="mt-6 hidden bg-white shadow rounded-lg p-4 overflow-x-auto"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
@@ -300,6 +308,19 @@
                 <span id="searchCount">0</span> hasil ditemukan
             </div>
         </div>
+        <div class="mt-4 flex gap-3">
+  <button 
+    onclick="ubahStatusMassal('Bayar')" 
+    class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">
+    Ubah Semua ke Bayar
+  </button>
+  <button 
+    onclick="ubahStatusMassal('Hutang')" 
+    class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded">
+    Ubah Semua ke Hutang
+  </button>
+</div>
+
 <div class="bg-white rounded-lg shadow-md p-6 my-6">
   <h2 class="text-xl font-semibold text-gray-800 mb-4">
     <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
@@ -1100,6 +1121,68 @@ function showSection(section) {
     }
 }
 
+function ubahStatusMassal(statusBaru) {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (!searchTerm) {
+    alert("Masukkan nama dulu di kolom pencarian!");
+    return;
+  }
+
+  const targetArray = document.getElementById('searchAll').checked ? dataArray : filteredDataArray;
+  const cocok = targetArray.filter(item => item.nama.toLowerCase().includes(searchTerm));
+
+  if (cocok.length === 0) {
+    alert("Tidak ada data dengan nama tersebut.");
+    return;
+  }
+
+  if (!confirm(`Yakin ingin mengubah ${cocok.length} data menjadi status "${statusBaru}"?`)) return;
+
+  const updates = {};
+  cocok.forEach(item => {
+    updates[`pembelian/${item.key}/status`] = statusBaru;
+  });
+
+  db.ref().update(updates)
+    .then(() => {
+      showStatus(`✅ Berhasil mengubah ${cocok.length} data ke status ${statusBaru}`, "success");
+      loadDataFromFirebase();
+    })
+    .catch(error => {
+      showStatus("❌ Gagal update massal: " + error.message, "error");
+    });
+}
+
+function hapusDataBulanIni() {
+  const selectedMonth = parseInt(document.getElementById('filterBulan').value);
+  const selectedYear = parseInt(document.getElementById('filterTahun').value);
+
+  const cocok = dataArray.filter(item => {
+    const date = new Date(item.tanggal);
+    return date.getMonth() === selectedMonth && date.getFullYear() === selectedYear;
+  });
+
+  if (cocok.length === 0) {
+    alert("Tidak ada data untuk bulan & tahun ini.");
+    return;
+  }
+
+  if (!confirm(`⚠️ Yakin ingin menghapus ${cocok.length} data pada ${getMonthName(selectedMonth)} ${selectedYear}?`)) return;
+
+  const updates = {};
+  cocok.forEach(item => {
+    updates[`pembelian/${item.key}`] = null; // null = delete di Firebase
+  });
+
+  db.ref().update(updates)
+    .then(() => {
+      showStatus(`🗑️ ${cocok.length} data berhasil dihapus untuk bulan ${getMonthName(selectedMonth)} ${selectedYear}`, "success");
+      loadDataFromFirebase();
+    })
+    .catch(error => {
+      showStatus("❌ Gagal menghapus data: " + error.message, "error");
+    });
+}
 
 function loadDataFromFirebase(callback) {
   db.ref("pembelian").once("value").then(snapshot => {
@@ -1227,6 +1310,7 @@ function createPieJenisPaketChart() {
 
    document.getElementById("searchInput").addEventListener("input", performSearch);
 document.getElementById("clearSearch").addEventListener("click", clearSearch);
+
 </script>
 
 </body>
