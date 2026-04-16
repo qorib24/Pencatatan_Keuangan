@@ -3,18 +3,101 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pencatatan Pembelian Paket Data KATI CELL</title>
+  
+  <!-- Font Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
   <!-- Import Tailwind CSS dari CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(15px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Glassmorphism Classes */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(240, 253, 244, 0.5);
+    }
+    
+    /* Modern Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c1e1c1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #86efac;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Hide Number Input Arrows */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+  </style>
+
   <!-- Import Font Awesome untuk ikon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <!-- Import Chart.js untuk grafik -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <!-- Tambahkan ini di bagian <head> -->
+  <!-- Chart.js Datalabels Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <!-- jsPDF & autoTable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -35,40 +118,86 @@
     const db = firebase.database();
   </script>
 </head>
-</head>
 
-<body class="bg-gray-50 min-h-screen">
+<body class="font-poppins bg-[#f8fafc] text-slate-800 min-h-screen antialiased selection:bg-emerald-200 selection:text-emerald-900 pb-20 md:pb-0 relative">
+
+  <!-- Main Background Decor -->
+  <div class="fixed top-0 left-0 w-full h-80 bg-gradient-to-br from-emerald-600 to-teal-800 -z-10 rounded-b-[40px] shadow-lg hidden md:block"></div>
+  <div class="fixed inset-0 bg-slate-50 -z-20"></div>
 
   <!-- Status/Loading Message (Global Toast) -->
   <div id="statusMessage" class="hidden"></div>
 
-  <section id="dashboardSection">
-    <!-- Header -->
-    <header class="bg-blue-600 text-white shadow-lg">
-      <div class="container mx-auto px-4 py-6">
-        <h1 class="text-3xl font-bold text-center">
-          <i class="fas fa-mobile-alt mr-2"></i>
-          Pencatatan Pembelian Paket Data
-        </h1>
+  <!-- Navbar -->
+  <nav class="glass-nav sticky top-0 z-40 lg:bg-transparent lg:backdrop-filter-none lg:border-none lg:text-white transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16 md:h-20">
+        <div class="flex items-center gap-3">
+          <div class="bg-white/20 backdrop-blur-sm text-emerald-600 md:text-white p-2.5 rounded-xl md:bg-white/10 border border-emerald-100 md:border-white/20">
+            <i class="fas fa-wallet text-xl"></i>
+          </div>
+          <h1 class="font-bold text-xl md:text-2xl text-emerald-900 md:text-white tracking-tight">Kati<span class="text-emerald-500 md:text-emerald-200">Finance</span></h1>
+        </div>
+        <div class="hidden md:flex space-x-2 lg:space-x-3">
+          <button onclick="showSection('dashboard')" class="px-4 lg:px-5 py-2 bg-white/10 border border-transparent hover:bg-white text-white hover:text-emerald-700 rounded-xl text-sm font-semibold transition-all">
+            <i class="fas fa-home mr-2"></i>Dashboard
+          </button>
+          <button onclick="showSection('data')" class="px-4 lg:px-5 py-2 bg-white/10 border border-transparent hover:bg-white text-white hover:text-emerald-700 rounded-xl text-sm font-semibold transition-all">
+            <i class="fas fa-database mr-2"></i>Data
+          </button>
+          <button onclick="showSection('form')" class="px-4 lg:px-5 py-2 bg-white text-emerald-700 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all ml-2">
+            <i class="fas fa-plus mr-2"></i>Tambah
+          </button>
+        </div>
       </div>
-    </header>
+    </div>
+  </nav>
+
+  <!-- Bottom Navigation (Mobile) -->
+  <div class="md:hidden glass-nav fixed bottom-0 left-0 w-full z-40 border-t border-emerald-100 px-2 py-2 flex justify-around items-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe bg-white/90">
+    <button onclick="showSection('dashboard')" class="flex flex-col items-center p-2 w-16 text-slate-500 hover:text-emerald-600 transition-colors">
+      <i class="fas fa-home text-xl mb-1"></i>
+      <span class="text-[10px] font-semibold">Beranda</span>
+    </button>
+    
+    <!-- Floating Action Button at Center -->
+    <div class="relative -top-6">
+      <button onclick="showSection('form')" class="flex items-center justify-center w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full text-white shadow-lg shadow-emerald-500/40 border-4 border-[#f8fafc] hover:scale-105 transition-transform">
+        <i class="fas fa-plus text-xl"></i>
+      </button>
+    </div>
+
+    <button onclick="showSection('data')" class="flex flex-col items-center p-2 w-16 text-slate-500 hover:text-emerald-600 transition-colors">
+      <i class="fas fa-database text-xl mb-1"></i>
+      <span class="text-[10px] font-semibold">Data</span>
+    </button>
+  </div>
 
 
+  <section id="dashboardSection" class="animate-fade-in pb-10">
+    <!-- Header Mobile Background (Hanya muncul di mobile) -->
+    <div class="md:hidden bg-gradient-to-br from-emerald-600 to-teal-800 pt-6 pb-24 px-4 rounded-b-[40px] shadow-lg mb-[-80px]">
+      <div class="mb-2 text-white mt-16"> <!-- mt-16 to offset the fixed navbar -->
+        <h2 class="text-2xl font-bold mb-1">Halo, Selamat Datang 👋</h2>
+        <p class="opacity-90 text-sm">Ringkasan transaksi bulan ini.</p>
+      </div>
+    </div>
+    
     <!-- Main Container -->
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-      <!-- Filter Bulan dan Tahun untuk Statistik -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          <i class="fas fa-filter mr-2 text-blue-600"></i>
-          Filter Statistik Bulanan
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="filterBulan" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-calendar-alt mr-1"></i>Bulan
-            </label>
-            <select id="filterBulan"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+    <div class="container mx-auto px-4 pt-4 md:pt-4 pb-8 max-w-6xl mt-0 z-10 relative">
+      
+      <!-- Welcome Intro (Desktop Only) -->
+      <div class="hidden md:block mb-8 text-slate-800">
+        <h2 class="text-3xl font-bold mb-1">Halo, Selamat Datang 👋</h2>
+        <p class="text-slate-500 text-base">Ringkasan transaksi KATI CELL bulan ini.</p>
+      </div>
+
+      <!-- Filter Section -->
+      <div class="glass-card rounded-2xl p-5 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex flex-col md:flex-row w-full md:w-auto gap-4 items-center">
+          <div class="flex items-center text-slate-700 bg-white/50 px-4 py-2 rounded-xl border border-slate-200 w-full md:w-auto">
+            <i class="fas fa-calendar-alt mr-3 text-emerald-500"></i>
+            <select id="filterBulan" class="bg-transparent font-medium focus:outline-none w-full cursor-pointer text-sm">
               <option value="0">Januari</option>
               <option value="1">Februari</option>
               <option value="2">Maret</option>
@@ -83,317 +212,342 @@
               <option value="11">Desember</option>
             </select>
           </div>
-          <div>
-            <label for="filterTahun" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-calendar mr-1"></i>Tahun
-            </label>
-            <select id="filterTahun"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <div class="flex items-center text-slate-700 bg-white/50 px-4 py-2 rounded-xl border border-slate-200 w-full md:w-auto">
+            <i class="fas fa-calendar mr-3 text-emerald-500"></i>
+            <select id="filterTahun" class="bg-transparent font-medium focus:outline-none w-full cursor-pointer text-sm">
               <!-- Tahun akan diisi oleh JavaScript -->
             </select>
           </div>
         </div>
+        
+        <div class="flex gap-2 w-full md:w-auto">
+          <button onclick="hapusDataBulanIni()" class="w-full md:w-auto px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-sm font-semibold rounded-xl border border-rose-200 transition-all shadow-sm">
+            <i class="fas fa-trash md:mr-1"></i> <span class="inline">Hapus Data Bulan Ini</span>
+          </button>
+        </div>
       </div>
-      <div class="flex flex-col md:flex-row justify-end gap-3 mt-4 mb-6">
-        <button onclick="hapusDataBulanIni()"
-          class="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition duration-300 w-full md:w-auto">
-          <i class="fas fa-trash mr-2"></i> Hapus Semua Data Bulan Ini
-        </button>
-
-        <button onclick="showSection('data')"
-          class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition duration-300 w-full md:w-auto">
-          <i class="fas fa-database mr-2"></i> Lihat Data Pembelian
-        </button>
-      </div>
-
-
 
       <!-- Statistik Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Pendapatan Bulan Ini -->
-        <div class="bg-gradient-to-r from-green-400 to-green-600 rounded-lg shadow-md p-6 text-white">
-          <div class="flex items-center justify-between">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8 group">
+        <!-- Pendapatan / Modal -->
+        <div class="glass-card bg-white rounded-2xl p-5 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden border-l-4 border-l-emerald-500">
+          <div class="absolute top-0 right-0 -mr-4 -mt-4 opacity-10">
+            <i class="fas fa-coins text-8xl text-emerald-500"></i>
+          </div>
+          <div class="flex items-start justify-between relative z-10">
             <div>
-              <p class="text-green-100 text-sm font-medium uppercase tracking-wide" id="labelPendapatan">Modal Paket
-                Bulan Ini</p>
-              <p class="text-3xl font-bold cursor-pointer" id="totalPendapatan">Rp 0</p>
-            </div>
-            <div class="bg-green-500/20 rounded-full p-3">
-              <i class="fas fa-coins text-2xl"></i>
+              <p class="text-slate-500 text-[11px] md:text-xs font-bold uppercase tracking-wider mb-1" id="labelPendapatan">Modal Bulan Ini</p>
+              <p class="text-xl md:text-2xl font-bold text-slate-800" id="totalPendapatan">Rp 0</p>
             </div>
           </div>
         </div>
 
-        <!-- Total Keuntungan Bulan Ini -->
-        <div class="bg-gradient-to-r from-teal-400 to-teal-600 rounded-lg shadow-md p-6 text-white">
-          <div class="flex items-center justify-between">
+        <!-- Keuntungan -->
+        <div class="glass-card bg-white rounded-2xl p-5 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden border-l-4 border-l-teal-500">
+           <div class="absolute top-0 right-0 -mr-4 -mt-4 opacity-10">
+            <i class="fas fa-wallet text-8xl text-teal-500"></i>
+          </div>
+          <div class="flex items-start justify-between relative z-10">
             <div>
-              <p class="text-teal-100 text-sm font-medium uppercase tracking-wide" id="labelKeuntungan">Keuntungan Bulan
-                Ini</p>
-              <p class="text-3xl font-bold" id="totalKeuntungan">Rp 0</p>
-            </div>
-            <div class="bg-teal-500/20 rounded-full p-3">
-              <i class="fas fa-wallet text-2xl"></i>
+              <p class="text-slate-500 text-[11px] md:text-xs font-bold uppercase tracking-wider mb-1" id="labelKeuntungan">Keuntungan</p>
+              <p class="text-xl md:text-2xl font-bold text-teal-600" id="totalKeuntungan">Rp 0</p>
             </div>
           </div>
         </div>
 
-        <!-- Total Hutang Bulan Ini -->
-        <div class="bg-gradient-to-r from-red-400 to-red-600 rounded-lg shadow-md p-6 text-white">
-          <div class="flex items-center justify-between">
+        <!-- Hutang -->
+        <div class="glass-card bg-white rounded-2xl p-5 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden border-l-4 border-l-rose-500">
+          <div class="absolute top-0 right-0 -mr-4 -mt-4 opacity-10">
+            <i class="fas fa-exclamation-triangle text-8xl text-rose-500"></i>
+          </div>
+          <div class="flex items-start justify-between relative z-10">
             <div>
-              <p class="text-red-100 text-sm font-medium uppercase tracking-wide" id="labelHutang">Hutang Bulan Ini</p>
-              <p class="text-3xl font-bold cursor-pointer" id="totalHutang">Rp 0</p>
-
-            </div>
-            <div class="bg-red-500/20 rounded-full p-3">
-              <i class="fas fa-exclamation-triangle text-2xl"></i>
+              <p class="text-slate-500 text-[11px] md:text-xs font-bold uppercase tracking-wider mb-1" id="labelHutang">Hutang Bulan Ini</p>
+              <p class="text-xl md:text-2xl font-bold text-rose-600" id="totalHutang">Rp 0</p>
             </div>
           </div>
         </div>
 
-        <!-- Total Transaksi Bulan Ini -->
-        <div class="bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg shadow-md p-6 text-white">
-          <div class="flex items-center justify-between">
+        <!-- Transaksi -->
+        <div class="glass-card bg-white rounded-2xl p-5 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden border-l-4 border-l-blue-500">
+          <div class="absolute top-0 right-0 -mr-4 -mt-4 opacity-10">
+            <i class="fas fa-chart-line text-8xl text-blue-500"></i>
+          </div>
+          <div class="flex items-start justify-between relative z-10">
             <div>
-              <p class="text-blue-100 text-sm font-medium uppercase tracking-wide" id="labelTransaksi">Transaksi Bulan
-                Ini</p>
-              <p class="text-3xl font-bold" id="totalTransaksi">0</p>
-            </div>
-            <div class="bg-blue-500/20 rounded-full p-3">
-              <i class="fas fa-chart-line text-2xl"></i>
+              <p class="text-slate-500 text-[11px] md:text-xs font-bold uppercase tracking-wider mb-1" id="labelTransaksi">Total Transaksi</p>
+              <p class="text-xl md:text-2xl font-bold text-slate-800" id="totalTransaksi">0</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <button onclick="tampilkanDaftarDashboard('Bayar')"
-          class="bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-lg shadow">
-          <i class="fas fa-users mr-2"></i> Lihat Daftar Customer yang Bayar
+      <!-- Action Buttons Lists -->
+      <div class="flex gap-4 mb-6">
+        <button onclick="tampilkanDaftarDashboard('Bayar')" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-semibold py-3 px-4 rounded-xl border border-emerald-200 transition-colors shadow-sm flex items-center justify-center">
+          <i class="fas fa-check-circle mr-2 text-emerald-500"></i> Daftar Lunas
         </button>
-        <button onclick="tampilkanDaftarDashboard('Hutang')"
-          class="bg-red-100 hover:bg-red-200 text-red-800 font-semibold py-2 px-4 rounded-lg shadow">
-          <i class="fas fa-users-slash mr-2"></i> Lihat Daftar Customer yang Hutang
+        <button onclick="tampilkanDaftarDashboard('Hutang')" class="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-sm font-semibold py-3 px-4 rounded-xl border border-rose-200 transition-colors shadow-sm flex items-center justify-center">
+          <i class="fas fa-times-circle mr-2 text-rose-500"></i> Daftar Hutang
         </button>
       </div>
 
-      <div id="listBayarDashboard" class="mt-6 hidden bg-white shadow rounded-lg p-4 overflow-x-auto"></div>
-      <div id="listHutangDashboard" class="mt-6 hidden bg-white shadow rounded-lg p-4 overflow-x-auto"></div>
-
-      <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+      <div id="listBayarDashboard" class="mt-4 hidden glass-card rounded-2xl p-5 overflow-x-auto mb-6 slide-up"></div>
+      <div id="listHutangDashboard" class="mt-4 hidden glass-card rounded-2xl p-5 overflow-x-auto mb-6 slide-up"></div>
 
       <!-- Grafik Jumlah Pembeli Per Bulan -->
-      <div class="bg-white rounded-xl shadow-lg p-8 mb-8 border border-gray-100">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800">
-            <i class="fas fa-chart-bar mr-3 text-purple-600"></i>
-            Jumlah Pembeli Per Bulan
+      <div class="glass-card rounded-2xl p-6 md:p-8 mb-8 relative z-10">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+          <h2 class="text-xl md:text-2xl font-bold text-slate-800">
+            <i class="fas fa-chart-bar mr-3 text-emerald-500"></i>
+            Top Pembeli Bulanan
           </h2>
-          <div class="bg-purple-50 px-4 py-2 rounded-full">
-            <span class="text-purple-700 font-semibold text-sm" id="chartYear">Loading...</span>
+          <div class="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
+            <span class="text-emerald-700 font-semibold text-xs md:text-sm" id="chartYear">Loading...</span>
           </div>
         </div>
-        <div class="w-full overflow-x-auto">
+        <div class="w-full overflow-x-auto pb-4">
           <div class="min-w-[640px] sm:min-w-full">
-            <canvas id="monthlyChart" class="w-full h-[300px] sm:h-[400px]"></canvas>
+            <canvas id="monthlyChart" class="w-full h-[250px] sm:h-[350px]"></canvas>
           </div>
         </div>
+      </div>
 
-        <!-- Form Section -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4 md:mb-0">
-              <i class="fas fa-plus-circle mr-2 text-blue-600"></i>
-              Tambah Data Pembelian
-            </h2>
-            <button type="button" onclick="document.getElementById('settingsModal').classList.remove('hidden')"
-              class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow border border-gray-300 text-sm flex items-center transition-colors">
-              <i class="fas fa-cog mr-2"></i> Atur Harga Paket
-            </button>
-          </div>
+    </div> <!-- Close container Dashboard -->
+  </section>
 
-          <!-- Form Input -->
-          <!-- Form Container yang responsif -->
-          <!-- ✅ FORM TANPA GRID LUAR -->
-          <div class="p-4">
-            <form id="formPaketData" class="flex flex-col gap-6">
+  <!-- FORM SECTION (Baru dipisah) -->
+  <section id="formSection" style="display: none;" class="animate-fade-in pb-10">
+    <!-- Header Design -->
+    <div class="bg-gradient-to-br from-emerald-600 to-teal-800 pt-8 pb-20 px-4 rounded-b-[40px] shadow-lg mb-[-60px]">
+       <div class="max-w-4xl mx-auto text-center md:text-left text-white">
+           <h2 class="text-2xl md:text-3xl font-bold mb-2">Tambah Transaksi Baru 📝</h2>
+           <p class="text-emerald-100 text-sm md:text-base">Catat detail pembelian paket data secara akurat.</p>
+       </div>
+    </div>
+    
+    <div class="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+      <div class="glass-card rounded-2xl p-6 md:p-8 mb-8 relative z-10 w-full bg-white/90">
+        <div class="flex justify-end mb-6 pb-4 border-b border-slate-100">
+          <button type="button" onclick="document.getElementById('settingsModal').classList.remove('hidden')"
+            class="bg-white hover:bg-slate-50 text-slate-700 font-semibold py-2.5 px-4 rounded-xl shadow-sm border border-slate-200 text-sm flex items-center transition-all">
+            <i class="fas fa-cog mr-2 text-emerald-500"></i> Atur Harga Paket
+          </button>
+        </div>
 
-              <!-- Input Nama -->
-              <div class="space-y-2">
-                <label for="nama" class="block text-sm font-medium text-gray-700">
-                  <i class="fas fa-user mr-1"></i>Nama Lengkap
-                </label>
+        <div class="p-0">
+          <form id="formPaketData" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+
+            <!-- Input Nama -->
+            <div class="space-y-1.5 focus-within:text-emerald-600 transition-colors">
+              <label for="nama" class="block text-sm font-semibold text-slate-700">
+                Nama Lengkap
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <i class="fas fa-user text-slate-400"></i>
+                </div>
                 <input type="text" id="nama" name="nama" required placeholder="Contoh: Joko"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all font-medium text-slate-800">
               </div>
+            </div>
 
-              <!-- Input Nomor HP -->
-              <div class="space-y-2">
-                <label for="nomorHP" class="block text-sm font-medium text-gray-700">
-                  <i class="fas fa-phone mr-1"></i>Nomor HP
-                </label>
+            <!-- Input Nomor HP -->
+            <div class="space-y-1.5 focus-within:text-emerald-600 transition-colors">
+              <label for="nomorHP" class="block text-sm font-semibold text-slate-700">
+                Nomor HP
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <i class="fas fa-phone text-slate-400"></i>
+                </div>
                 <input type="tel" id="nomorHP" name="nomorHP" required pattern="[0-9]{10,13}"
-                  placeholder="Contoh: 081234567890" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  placeholder="Contoh: 081234567890" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all font-medium text-slate-800">
               </div>
+            </div>
 
-              <!-- Dropdown Jenis Paket -->
-              <div class="space-y-2">
-                <label for="jenisPaket" class="block text-sm font-medium text-gray-700">
-                  <i class="fas fa-box mr-1"></i>Jenis Paket
-                </label>
+            <!-- Dropdown Jenis Paket -->
+            <div class="space-y-1.5 focus-within:text-emerald-600 transition-colors">
+              <label for="jenisPaket" class="block text-sm font-semibold text-slate-700">
+                Jenis Paket
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <i class="fas fa-box text-slate-400"></i>
+                </div>
                 <select id="jenisPaket" name="jenisPaket" required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  class="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all font-medium text-slate-800 appearance-none">
                   <option value="">Pilih Jenis Paket</option>
                   <option value="VPN">VPN</option>
                   <option value="Reguler">Reguler</option>
                 </select>
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                  <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+                </div>
               </div>
+            </div>
 
-              <!-- Input Harga Dihapus: Otomatis dari Pengaturan -->
-
-              <!-- Input Tanggal -->
-              <div class="space-y-2">
-                <label for="tanggalPembelian" class="block text-sm font-medium text-gray-700">
-                  <i class="fas fa-calendar-alt mr-1"></i>Tanggal Pembelian
-                </label>
+            <!-- Input Tanggal -->
+            <div class="space-y-1.5 focus-within:text-emerald-600 transition-colors">
+              <label for="tanggalPembelian" class="block text-sm font-semibold text-slate-700">
+                Tanggal Transaksi
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <i class="fas fa-calendar-alt text-slate-400"></i>
+                </div>
                 <input type="date" id="tanggalPembelian" name="tanggalPembelian" required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all font-medium text-slate-800">
               </div>
+            </div>
 
-              <!-- Status Pembayaran -->
-              <div class="space-y-2">
-                <label for="statusPembayaran" class="block text-sm font-medium text-gray-700">
-                  <i class="fas fa-credit-card mr-1"></i>Status Pembayaran
-                </label>
+            <!-- Status Pembayaran -->
+            <div class="space-y-1.5 focus-within:text-emerald-600 transition-colors md:col-span-2">
+              <label for="statusPembayaran" class="block text-sm font-semibold text-slate-700">
+                Status Pembayaran
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <i class="fas fa-credit-card text-slate-400"></i>
+                </div>
                 <select id="statusPembayaran" name="statusPembayaran" required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  class="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all font-medium text-slate-800 appearance-none">
                   <option value="">Pilih Status Pembayaran</option>
-                  <option value="Bayar">Bayar</option>
+                  <option value="Bayar">Lunas / Bayar</option>
                   <option value="Hutang">Hutang</option>
                 </select>
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                  <i class="fas fa-chevron-down text-slate-400 text-sm"></i>
+                </div>
               </div>
+            </div>
 
-              <!-- Tombol Submit -->
-              <div class="pt-4">
-                <button type="submit" id="btnSubmit"
-                  class="relative w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition duration-300 ease-in-out overflow-hidden">
-                  <span id="btnText" class="flex items-center justify-center">
-                    <i class="fas fa-save mr-2"></i>Simpan Data
-                  </span>
-                  <span id="btnLoading" class="hidden flex items-center justify-center">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-                      fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                      </path>
-                    </svg>
-                    Menyimpan...
-                  </span>
-                </button>
-              </div>
-            </form>
-          </div>
+            <!-- Tombol Submit -->
+            <div class="pt-4 md:col-span-2">
+              <button type="submit" id="btnSubmit"
+                class="relative w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3.5 px-6 rounded-xl transition duration-300 ease-in-out overflow-hidden shadow-lg shadow-emerald-500/30">
+                <span id="btnText" class="flex items-center justify-center text-lg tracking-wide">
+                  <i class="fas fa-save mr-2"></i>Simpan Transaksi
+                </span>
+                <span id="btnLoading" class="hidden flex items-center justify-center text-lg tracking-wide">
+                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                  </svg>
+                  Menyimpan...
+                </span>
+              </button>
+            </div>
+          </form>
         </div>
-      </div> <!-- Close container -->
+      </div>
+    </div> <!-- Close container Form -->
   </section>
 
-  <section id="dataSection" style="display: none;">
+  <section id="dataSection" style="display: none;" class="animate-fade-in pb-10">
+    <!-- Header Design Data -->
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 pt-8 pb-20 px-4 rounded-b-[40px] shadow-lg mb-[-60px]">
+       <div class="max-w-6xl mx-auto text-center md:text-left text-white">
+           <h2 class="text-2xl md:text-3xl font-bold mb-2">Pusat Data Transaksi 📊</h2>
+           <p class="text-slate-300 text-sm md:text-base">Kelola, cari, dan tinjau seluruh data pembelian.</p>
+       </div>
+    </div>
+
     <!-- Main Container for Data Section -->
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <div class="container mx-auto px-4 py-8 max-w-6xl relative z-10">
 
       <!-- Pencarian -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          <i class="fas fa-search mr-2 text-blue-600"></i>
+      <div class="glass-card rounded-2xl p-6 mb-8">
+        <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-4 pb-3 border-b border-slate-100">
+          <i class="fas fa-search mr-2 text-emerald-500"></i>
           Pencarian Data
         </h2>
         <div class="relative">
-          <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau nomor HP..."
-            class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-search text-gray-400"></i>
+          <input type="text" id="searchInput" placeholder="Ketik nama atau nomor HP..."
+            class="w-full px-5 py-4 pl-12 bg-slate-50/80 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-slate-800 font-medium shadow-sm">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="fas fa-search text-emerald-500 text-lg"></i>
           </div>
           <button id="clearSearch"
-            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 hidden">
-            <i class="fas fa-times"></i>
+            class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 hidden transition-colors">
+            <i class="fas fa-times-circle text-xl"></i>
           </button>
         </div>
-        <div class="mt-3 flex items-center space-x-2">
-          <input type="checkbox" id="searchAll" class="form-checkbox text-blue-600">
-          <label for="searchAll" class="text-sm text-gray-700">Cari di semua data (abaikan filter bulan/tahun)</label>
+        <div class="mt-4 flex items-center bg-blue-50 text-blue-800 px-4 py-3 rounded-xl border border-blue-100">
+          <input type="checkbox" id="searchAll" class="w-5 h-5 text-emerald-600 rounded bg-white border-blue-300 focus:ring-emerald-500 mr-3">
+          <label for="searchAll" class="text-sm font-medium cursor-pointer">Cari di SELURUH periode (Abaikan filter bulan)</label>
         </div>
-        <div id="searchResults" class="mt-4 text-sm text-gray-600 hidden">
-          <span id="searchCount">0</span> hasil ditemukan
+        <div id="searchResults" class="mt-4 text-sm font-medium text-emerald-700 bg-emerald-50 px-4 py-3 rounded-xl border border-emerald-100 hidden">
+          <i class="fas fa-info-circle mr-2"></i>Ditemukan <span id="searchCount" class="font-bold text-emerald-900 mx-1">0</span> hasil pencarian
         </div>
       </div>
-      <div class="mt-4 flex gap-3">
+      
+      <!-- Ubah Status Massal Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-6">
         <button onclick="ubahStatusMassal('Bayar')"
-          class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">
-          Ubah Semua ke Bayar
+          class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-3 rounded-xl shadow border border-emerald-600 transition-colors flex items-center justify-center">
+          <i class="fas fa-check-square mr-2"></i> Ubah Filtered ke Lunas
         </button>
         <button onclick="ubahStatusMassal('Hutang')"
-          class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded">
-          Ubah Semua ke Hutang
+          class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-3 rounded-xl shadow border border-rose-600 transition-colors flex items-center justify-center">
+          <i class="fas fa-exclamation-square mr-2"></i> Ubah Filtered ke Hutang
         </button>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6 my-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
-          Grafik Jenis Paket - Bulan Terpilih
-        </h2>
-        <div class="w-full max-w-md mx-auto">
-          <canvas id="pieJenisPaketChart" class="w-full h-auto"></canvas>
+      <div class="glass-card rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="w-full md:w-1/2">
+          <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-2">
+            <i class="fas fa-chart-pie mr-2 text-emerald-500"></i>
+            Proporsi Jenis Paket
+          </h2>
+          <p class="text-slate-500 text-sm mb-4">Melihat perbandingan pembelian paket VPN vs Reguler dari filter yang sedang aktif.</p>
         </div>
-
+        <div class="w-full md:w-1/2 max-w-[250px] mx-auto">
+          <canvas id="pieJenisPaketChart" class="w-full h-auto drop-shadow-md"></canvas>
+        </div>
       </div>
 
       <!-- Tabel Data -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="px-6 py-4 bg-gray-50 border-b">
-          <h2 class="text-2xl font-semibold text-gray-800">
-            <i class="fas fa-table mr-2 text-blue-600"></i>
-            Data Pembelian Paket Data
+      <div class="glass-card rounded-2xl overflow-hidden mt-6">
+        <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 class="text-xl font-bold text-slate-800">
+            <i class="fas fa-table mr-2 text-emerald-500"></i>
+            Tabel Transaksi
           </h2>
-
-        </div>
-        <div class="flex justify-end mt-4 px-6">
           <button onclick="exportToPDF()"
-            class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded shadow">
-            <i class="fas fa-file-pdf mr-2"></i> Export PDF
+            class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center">
+            <i class="fas fa-file-pdf mr-2"></i> Ekspor PDF
           </button>
         </div>
 
         <!-- Loading indicator untuk tabel -->
-        <div id="loadingTable" class="p-8 text-center">
-          <i class="fas fa-spinner fa-spin text-blue-600 text-2xl mb-2"></i>
-          <p class="text-gray-600">Memuat data...</p>
+        <div id="loadingTable" class="p-12 text-center">
+          <i class="fas fa-spinner fa-spin text-emerald-500 text-3xl mb-3"></i>
+          <p class="text-slate-500 font-medium">Memuat data dari database...</p>
         </div>
 
         <!-- Container untuk tabel -->
         <div id="tableContainer" class="hidden">
           <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-100">
+            <table class="w-full whitespace-nowrap">
+              <thead class="bg-slate-50/80 border-b border-slate-200 text-slate-600 uppercase text-[11px] font-bold tracking-wider">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor HP
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Paket
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modal</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hasil</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                  <th class="px-6 py-4 text-left rounded-tl-xl">No</th>
+                  <th class="px-6 py-4 text-left">Nama</th>
+                  <th class="px-6 py-4 text-left">Nomor HP</th>
+                  <th class="px-6 py-4 text-left">Paket</th>
+                  <th class="px-6 py-4 text-right">Modal</th>
+                  <th class="px-6 py-4 text-right">Harga</th>
+                  <th class="px-6 py-4 text-right text-emerald-600">Hasil</th>
+                  <th class="px-6 py-4 text-left">Tanggal</th>
+                  <th class="px-6 py-4 text-center">Status</th>
+                  <th class="px-6 py-4 text-center rounded-tr-xl">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="dataTable" class="bg-white divide-y divide-gray-200">
+              <tbody id="dataTable" class="divide-y divide-slate-100 text-slate-700 bg-white/50">
                 <!-- Data akan diisi oleh JavaScript -->
               </tbody>
             </table>
@@ -401,54 +555,57 @@
         </div>
 
         <!-- Pesan jika tidak ada data -->
-        <div id="noDataMessage" class="hidden p-8 text-center text-gray-500">
-          <i class="fas fa-inbox text-4xl mb-4"></i>
-          <p>Belum ada data pembelian paket data</p>
+        <div id="noDataMessage" class="hidden p-12 text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 text-slate-400 mb-4">
+            <i class="fas fa-inbox text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 mb-1">Data Kosong</h3>
+          <p class="text-slate-500 text-sm">Belum ada transaksi pada periode terpilih.</p>
         </div>
       </div> <!-- End Table bg-white -->
     </div> <!-- End container -->
   </section> <!-- End dataSection -->
 
   <!-- Modal Edit Status -->
-  <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-      <div class="mt-3">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-medium text-gray-900">
-            <i class="fas fa-edit mr-2 text-blue-600"></i>
-            Edit Data
-          </h3>
-          <button id="closeModal" class="text-gray-400 hover:text-gray-600">
-            <i class="fas fa-times"></i>
-          </button>
+  <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-all opacity-0 animate-fade-in" style="animation-fill-mode: forwards;">
+    <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-sm shadow-2xl rounded-2xl bg-white overflow-hidden transform transition-all">
+      <div class="bg-gradient-to-r from-emerald-500 to-teal-400 p-4 text-white flex justify-between items-center">
+        <h3 class="text-lg font-bold">
+          <i class="fas fa-edit mr-2"></i> Edit Tansaksi
+        </h3>
+        <button id="closeModal" class="text-white/80 hover:text-white transition-colors">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      
+      <div class="p-6">
+        <div class="mb-5 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Detail Pelanggan</p>
+          <p class="text-sm text-slate-800 font-bold mb-1"><span id="editNama"></span></p>
+          <p class="text-xs text-slate-600 mb-2"><i class="fas fa-phone mr-1 text-slate-400"></i><span id="editNomorHP"></span></p>
+          <div class="h-px bg-slate-200 my-2"></div>
+          <p class="text-sm font-bold text-emerald-600 mt-2"><span id="editHarga"></span></p>
         </div>
-        <!-- Modal Daftar Pelanggan -->
 
-
-        <div class="mb-4">
-          <p class="text-sm text-gray-600 mb-2">Nama: <span id="editNama" class="font-medium"></span></p>
-          <p class="text-sm text-gray-600 mb-2">Nomor HP: <span id="editNomorHP" class="font-medium"></span></p>
-          <p class="text-sm text-gray-600 mb-4">Harga: <span id="editHarga" class="font-medium"></span></p>
-
-          <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-2">
-            Status Pembayaran:
+        <div class="mb-6">
+          <label for="editStatus" class="block text-sm font-semibold text-slate-700 mb-2">
+            Status Pembayaran Baru:
           </label>
           <select id="editStatus"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option value="Bayar">Bayar</option>
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm font-medium">
+            <option value="Bayar">Lunas / Bayar</option>
             <option value="Hutang">Hutang</option>
           </select>
         </div>
 
-        <div class="flex justify-end space-x-3">
+        <div class="flex gap-3">
           <button id="cancelEdit"
-            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-200">
+            class="w-1/2 px-4 py-3 bg-white text-slate-700 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">
             Batal
           </button>
           <button id="saveEdit"
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
-            <i class="fas fa-save mr-1"></i>
-            Simpan
+            class="w-1/2 px-4 py-3 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-600 shadow-md shadow-emerald-500/30 transition-all flex items-center justify-center">
+            <i class="fas fa-save mr-2"></i> Simpan
           </button>
         </div>
       </div>
@@ -456,95 +613,107 @@
   </div>
 
   <div id="statusListModal"
-    class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-semibold text-gray-800" id="modalTitle">Daftar Pelanggan</h3>
-        <button id="closeStatusListModal" class="text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times text-lg"></i>
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center hidden z-[60] animate-fade-in" style="animation-fill-mode: forwards;">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 overflow-hidden flex flex-col max-h-[80vh]">
+      <div class="bg-gradient-to-r from-slate-100 to-white px-6 py-4 border-b border-slate-200 flex justify-between items-center shrink-0">
+        <h3 class="text-lg md:text-xl font-bold text-slate-800" id="modalTitle">Daftar Pelanggan</h3>
+        <button id="closeStatusListModal" class="text-slate-400 hover:text-slate-600 transition-colors">
+          <i class="fas fa-times-circle text-2xl"></i>
         </button>
       </div>
-      <div id="statusListContent" class="max-h-96 overflow-y-auto">
+      <div id="statusListContent" class="overflow-y-auto p-4 md:p-6 bg-slate-50 flex-1 custom-scrollbar">
         <!-- Daftar pelanggan akan muncul di sini -->
       </div>
     </div>
   </div>
 
-  <footer class="bg-gray-800 text-white text-center py-6 mt-12">
-    <p>&copy; 2025 Sistem Pencatatan Paket Data. Dibuat Oleh Kati Cell</p>
-  </footer>
-
   <!-- Modal Pengaturan Harga Paket -->
   <div id="settingsModal"
-    class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-[60]">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 mx-4">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-900">
-          <i class="fas fa-cog mr-2 text-blue-600"></i>
-          Pengaturan Harga Paket
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center hidden z-[70] animate-fade-in" style="animation-fill-mode: forwards;">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      
+      <div class="bg-gradient-to-r from-emerald-500 to-teal-400 px-6 py-4 text-white flex justify-between items-center">
+        <h3 class="text-lg font-bold">
+          <i class="fas fa-cog mr-2"></i> Pengaturan Harga
         </h3>
-        <button id="closeSettingsModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <button id="closeSettingsModal" class="text-white/80 hover:text-white transition-colors">
           <i class="fas fa-times text-xl"></i>
         </button>
       </div>
 
-      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
-        <p class="text-sm text-blue-700">Nominal <strong>Harga Jual</strong> dan <strong>Harga Modal</strong> ini akan
-          otomatis digunakan pada setiap penambahan transaksi baru.</p>
-      </div>
+      <div class="p-6">
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-5 flex items-start gap-3">
+          <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+          <p class="text-xs text-blue-800 leading-relaxed">
+            Harga Jual dan Modal akan di set <strong>otomatis</strong> pada transaksi baru sesuai pilihan jenis paket.
+          </p>
+        </div>
 
-      <div class="space-y-4 mb-6">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="hargaVPN" class="block text-sm font-medium text-gray-700 mb-1">
-              <i class="fas fa-tag mr-1 text-gray-500"></i> Harga Jual VPN
-            </label>
-            <input type="number" id="hargaVPN" min="0" step="500"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 drop-shadow-sm"
-              placeholder="Rp..">
+        <div class="space-y-5">
+          <!-- VPN -->
+          <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl relative">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider absolute -top-2.5 bg-white px-2 left-3 rounded-full border border-slate-100">Paket VPN</h4>
+            <div class="grid grid-cols-2 gap-4 mt-2">
+              <div>
+                <label for="hargaVPN" class="block text-xs font-semibold text-slate-600 mb-1">Harga Jual</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm font-medium">Rp</span>
+                  <input type="number" id="hargaVPN" min="0" step="500" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/50 text-sm font-medium" placeholder="0">
+                </div>
+              </div>
+              <div>
+                <label for="modalVPN" class="block text-xs font-semibold text-slate-600 mb-1">Harga Modal</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm font-medium">Rp</span>
+                  <input type="number" id="modalVPN" min="0" step="500" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/50 text-sm font-medium" placeholder="0">
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label for="modalVPN" class="block text-sm font-medium text-gray-700 mb-1">
-              <i class="fas fa-shield-alt mr-1 text-gray-500"></i> Harga Modal VPN
-            </label>
-            <input type="number" id="modalVPN" min="0" step="500"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 drop-shadow-sm"
-              placeholder="Rp..">
+
+          <!-- REGULER -->
+          <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl relative">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider absolute -top-2.5 bg-white px-2 left-3 rounded-full border border-slate-100">Paket Reguler</h4>
+            <div class="grid grid-cols-2 gap-4 mt-2">
+              <div>
+                <label for="hargaReguler" class="block text-xs font-semibold text-slate-600 mb-1">Harga Jual</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm font-medium">Rp</span>
+                  <input type="number" id="hargaReguler" min="0" step="500" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/50 text-sm font-medium" placeholder="0">
+                </div>
+              </div>
+              <div>
+                <label for="modalReguler" class="block text-xs font-semibold text-slate-600 mb-1">Harga Modal</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm font-medium">Rp</span>
+                  <input type="number" id="modalReguler" min="0" step="500" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500/50 text-sm font-medium" placeholder="0">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200">
-          <div>
-            <label for="hargaReguler" class="block text-sm font-medium text-gray-700 mb-1">
-              <i class="fas fa-tag mr-1 text-gray-500"></i> Jual Reguler
-            </label>
-            <input type="number" id="hargaReguler" min="0" step="500"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 drop-shadow-sm"
-              placeholder="Rp..">
-          </div>
-          <div>
-            <label for="modalReguler" class="block text-sm font-medium text-gray-700 mb-1">
-              <i class="fas fa-signal mr-1 text-gray-500"></i> Modal Reguler
-            </label>
-            <input type="number" id="modalReguler" min="0" step="500"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 drop-shadow-sm"
-              placeholder="Rp..">
-          </div>
+        <div class="flex gap-3 mt-6">
+          <button id="cancelSettingsBtn" class="flex-1 py-2.5 bg-white text-slate-700 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-sm">
+            Batal
+          </button>
+          <button id="saveSettingsBtn" class="flex-1 py-2.5 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-600 shadow-md shadow-emerald-500/30 transition-all flex items-center justify-center text-sm">
+            <i class="fas fa-save mr-2"></i> Simpan
+          </button>
         </div>
-      </div>
-
-      <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-        <button id="cancelSettingsBtn"
-          class="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200 transition-colors">
-          Batal
-        </button>
-        <button id="saveSettingsBtn"
-          class="px-5 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 flex items-center">
-          <i class="fas fa-save mr-2"></i> Simpan
-        </button>
       </div>
     </div>
   </div>
+
+  <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 text-center py-8 mt-12 pb-24 md:pb-8">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="flex items-center justify-center gap-2 mb-3">
+        <i class="fas fa-wallet text-emerald-500 text-xl"></i>
+        <h2 class="text-xl font-bold text-white tracking-tight">Kati<span class="text-emerald-500">Finance</span></h2>
+      </div>
+      <p class="text-sm opacity-80">&copy; 2026 Sistem Pencatatan Paket Data. Dibuat Oleh Kati Cell.</p>
+    </div>
+  </footer>
 
   <script>
     // ==========================================
@@ -734,33 +903,33 @@
       modalTitle.textContent = `Daftar Customer dengan Status "${status}"`;
 
       if (filtered.length === 0) {
-        listContainer.innerHTML = `<p class="text-gray-500 text-center">Tidak ada data ${status.toLowerCase()} bulan ini.</p>`;
+        listContainer.innerHTML = `<p class="text-slate-500 text-center py-4 text-sm"><i class="fas fa-inbox text-2xl mb-2 block mx-auto text-slate-300"></i>Tidak ada data ${status.toLowerCase()} bulan ini.</p>`;
       } else {
         const listHTML = `
-      <table class="w-full text-sm text-left border">
-        <thead class="bg-gray-100 text-gray-600">
+      <table class="w-full text-left whitespace-nowrap">
+        <thead class="bg-slate-100 text-slate-600 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
           <tr>
-            <th class="py-2 px-3">No</th>
-            <th class="py-2 px-3">Nama</th>
-            <th class="py-2 px-3">Nomor HP</th>
-            <th class="py-2 px-3">Jenis Paket</th>
-            <th class="py-2 px-3">Modal</th>
-            <th class="py-2 px-3">Harga</th>
-            <th class="py-2 px-3">Hasil</th>
-            <th class="py-2 px-3">Tanggal</th>
+            <th class="py-3 px-4">No</th>
+            <th class="py-3 px-4">Nama</th>
+            <th class="py-3 px-4">Nomor HP</th>
+            <th class="py-3 px-4">Jenis Paket</th>
+            <th class="py-3 px-4 text-right">Modal</th>
+            <th class="py-3 px-4 text-right">Harga</th>
+            <th class="py-3 px-4 text-right text-emerald-600">Hasil</th>
+            <th class="py-3 px-4">Tanggal</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-slate-100 bg-white">
           ${filtered.map((item, i) => `
-            <tr class="border-t">
-              <td class="py-2 px-3">${i + 1}</td>
-              <td class="py-2 px-3">${item.nama}</td>
-              <td class="py-2 px-3">${item.nomorHP}</td>
-              <td class="py-2 px-3">${item.jenisPaket || '-'}</td>
-              <td class="py-2 px-3">${formatRupiah(item.modal || 0)}</td>
-              <td class="py-2 px-3">${formatRupiah(item.harga)}</td>
-              <td class="py-2 px-3">${formatRupiah(item.hasil || 0)}</td>
-              <td class="py-2 px-3">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="py-3 px-4 text-sm text-slate-500">${i + 1}</td>
+              <td class="py-3 px-4 text-sm font-medium text-slate-800">${item.nama}</td>
+              <td class="py-3 px-4 text-sm text-slate-600">${item.nomorHP}</td>
+              <td class="py-3 px-4 text-sm text-slate-600">${item.jenisPaket || '-'}</td>
+              <td class="py-3 px-4 text-sm font-medium text-slate-700 text-right">${formatRupiah(item.modal || 0)}</td>
+              <td class="py-3 px-4 text-sm font-medium text-slate-700 text-right">${formatRupiah(item.harga)}</td>
+              <td class="py-3 px-4 text-sm font-medium text-emerald-600 text-right">${formatRupiah(item.hasil || 0)}</td>
+              <td class="py-3 px-4 text-sm text-slate-600">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -922,37 +1091,44 @@
       });
 
       const listHTML = `
-    <h3 class="text-lg font-semibold text-${status === 'Bayar' ? 'green' : 'red'}-700 mb-2">
-      Daftar Customer ${status} Bulan Ini
-    </h3>
-    ${filtered.length === 0 ? '<p class="text-gray-500 text-sm">Tidak ada data.</p>' : `
-      <table class="w-full text-sm text-left border">
-        <thead class="bg-gray-100 text-gray-600">
-          <tr>
-            <th class="py-2 px-3">No</th>
-            <th class="py-2 px-3">Nama</th>
-            <th class="py-2 px-3">HP</th>
-            <th class="py-2 px-3">Paket</th>
-            <th class="py-2 px-3">Modal</th>
-            <th class="py-2 px-3">Harga</th>
-            <th class="py-2 px-3">Hasil</th>
-            <th class="py-2 px-3">Tanggal</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filtered.map((item, i) => `
-            <tr class="border-t">
-              <td class="py-2 px-3">${i + 1}</td>
-              <td class="py-2 px-3">${item.nama}</td>
-              <td class="py-2 px-3">${item.nomorHP}</td>
-              <td class="py-2 px-3">${item.jenisPaket || '-'}</td>
-              <td class="py-2 px-3">${formatRupiah(item.modal || 0)}</td>
-              <td class="py-2 px-3">${formatRupiah(item.harga || 0)}</td>
-              <td class="py-2 px-3">${formatRupiah(item.hasil || 0)}</td>
-              <td class="py-2 px-3">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
+    <div class="flex items-center mb-4">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 ${status === 'Bayar' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
+        <i class="fas ${status === 'Bayar' ? 'fa-check' : 'fa-times'}"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-800">
+        Daftar Customer ${status} Bulan Ini
+      </h3>
+    </div>
+    ${filtered.length === 0 ? '<div class="text-center py-6 bg-slate-50 rounded-xl"><i class="fas fa-inbox text-slate-300 text-3xl mb-2"></i><p class="text-slate-500 text-sm font-medium">Tidak ada data.</p></div>' : `
+      <div class="overflow-x-auto rounded-xl border border-slate-100">
+        <table class="w-full text-left whitespace-nowrap">
+          <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider border-b border-slate-100">
+            <tr>
+              <th class="py-3 px-4">No</th>
+              <th class="py-3 px-4">Nama</th>
+              <th class="py-3 px-4">HP</th>
+              <th class="py-3 px-4">Paket</th>
+              <th class="py-3 px-4 text-right">Modal</th>
+              <th class="py-3 px-4 text-right">Harga</th>
+              <th class="py-3 px-4 text-right text-emerald-600">Hasil</th>
+              <th class="py-3 px-4">Tanggal</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50 bg-white">
+            ${filtered.map((item, i) => `
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-4 text-xs text-slate-500">${i + 1}</td>
+                <td class="py-3 px-4 text-sm font-bold text-slate-700">${item.nama}</td>
+                <td class="py-3 px-4 text-xs font-medium text-slate-600">${item.nomorHP}</td>
+                <td class="py-3 px-4 text-xs font-medium text-slate-600">${item.jenisPaket || '-'}</td>
+                <td class="py-3 px-4 text-xs font-semibold text-slate-600 text-right">${formatRupiah(item.modal || 0)}</td>
+                <td class="py-3 px-4 text-xs font-semibold text-slate-600 text-right">${formatRupiah(item.harga || 0)}</td>
+                <td class="py-3 px-4 text-xs font-bold text-emerald-500 text-right">${formatRupiah(item.hasil || 0)}</td>
+                <td class="py-3 px-4 text-xs text-slate-500">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
     `}
   `;
 
@@ -995,40 +1171,40 @@
       // Render data
       filteredDataArray.forEach((item, index) => {
         const row = document.createElement('tr');
-        row.className = 'hover:bg-gray-50 transition-colors duration-200';
+        row.className = 'hover:bg-slate-50 transition-colors duration-200';
 
-        const statusClass = item.status === 'Bayar' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+        const statusClass = item.status === 'Bayar' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200';
         const statusIcon = item.status === 'Bayar' ? 'fa-check-circle' : 'fa-exclamation-triangle';
 
         row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${index + 1}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">${item.nama}</div>
+                        <div class="text-sm font-bold text-slate-800">${item.nama}</div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.nomorHP}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600">${item.nomorHP}</td>
                     
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.jenisPaket || '-'}</td> <!-- ✅ Tambahan -->
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatRupiah(parseFloat(item.modal || 0))}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatRupiah(parseFloat(item.harga || 0))}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatRupiah(parseFloat(item.hasil || 0))}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
-                            <i class="fas ${statusIcon} mr-1"></i>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600">${item.jenisPaket || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-700 text-right">${formatRupiah(parseFloat(item.modal || 0))}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-700 text-right">${formatRupiah(parseFloat(item.harga || 0))}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600 text-right">${formatRupiah(parseFloat(item.hasil || 0))}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide shadow-sm ${statusClass}">
+                            <i class="fas ${statusIcon} mr-1.5"></i>
                             ${item.status}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2 text-center">
                         <button 
                             onclick="editData(${dataArray.indexOf(item)})" 
-                            class="text-blue-600 hover:text-blue-900 transition-colors duration-200"
+                            class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm flex items-center justify-center inline-flex"
                             title="Edit"
                         >
                             <i class="fas fa-edit"></i>
                         </button>
                         <button 
                             onclick="deleteData(${dataArray.indexOf(item)})" 
-                            class="text-red-600 hover:text-red-900 transition-colors duration-200"
+                            class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm flex items-center justify-center inline-flex"
                             title="Hapus"
                         >
                             <i class="fas fa-trash"></i>
@@ -1141,26 +1317,27 @@
           count++;
 
           const row = document.createElement('tr');
-          const statusClass = item.status === 'Bayar' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+          row.className = 'hover:bg-slate-50 transition-colors duration-200';
+          const statusClass = item.status === 'Bayar' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200';
           const statusIcon = item.status === 'Bayar' ? 'fa-check-circle' : 'fa-exclamation-triangle';
 
           row.innerHTML = `
-                <td class="px-6 py-4">${index + 1}</td>
-                <td class="px-6 py-4">${item.nama}</td>
-                <td class="px-6 py-4">${item.nomorHP}</td>
-                <td class="px-6 py-4">${item.jenisPaket || '-'}</td>
-                <td class="px-6 py-4">${formatRupiah(parseFloat(item.modal || 0))}</td>
-                <td class="px-6 py-4">${formatRupiah(parseFloat(item.harga || 0))}</td>
-                <td class="px-6 py-4">${formatRupiah(parseFloat(item.hasil || 0))}</td>
-                <td class="px-6 py-4">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
-                <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
-                        <i class="fas ${statusIcon} mr-1"></i> ${item.status}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${index + 1}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800">${item.nama}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600">${item.nomorHP}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600">${item.jenisPaket || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-700 text-right">${formatRupiah(parseFloat(item.modal || 0))}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-700 text-right">${formatRupiah(parseFloat(item.harga || 0))}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600 text-right">${formatRupiah(parseFloat(item.hasil || 0))}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide shadow-sm ${statusClass}">
+                        <i class="fas ${statusIcon} mr-1.5"></i> ${item.status}
                     </span>
                 </td>
-                <td class="px-6 py-4">
-                    <button onclick="editData(${dataArray.indexOf(item)})" class="text-blue-600"><i class="fas fa-edit"></i></button>
-                    <button onclick="deleteData(${dataArray.indexOf(item)})" class="text-red-600 ml-2"><i class="fas fa-trash"></i></button>
+                <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                    <button onclick="editData(${dataArray.indexOf(item)})" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm inline-flex items-center justify-center"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteData(${dataArray.indexOf(item)})" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm inline-flex items-center justify-center"><i class="fas fa-trash"></i></button>
                 </td>
             `;
           tableBody.appendChild(row);
@@ -1251,6 +1428,7 @@
     function showSection(section) {
       document.getElementById('dashboardSection').style.display = (section === 'dashboard') ? 'block' : 'none';
       document.getElementById('dataSection').style.display = (section === 'data') ? 'block' : 'none';
+      document.getElementById('formSection').style.display = (section === 'form') ? 'block' : 'none';
 
       // ✅ Render chart ketika pindah ke halaman data
       if (section === 'data') {
