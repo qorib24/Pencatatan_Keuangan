@@ -1250,7 +1250,8 @@
         const hasilStr = cells[6].innerText;
         const harga = parseFloat(hargaStr.replace(/[^\d]/g, '') || 0);
         const tanggal = cells[7].innerText;
-        const status = cells[8].innerText.trim();
+        const statusText = cells[8].textContent.trim();
+        const statusUpper = statusText.toUpperCase();
 
         rows.push([
           index + 1,
@@ -1261,13 +1262,13 @@
           hargaStr,
           hasilStr,
           tanggal,
-          status
+          statusText
         ]);
 
-        if (status.includes("Bayar")) {
+        if (statusUpper.includes("BAYAR")) {
           totalBayar += harga;
           countBayar++;
-        } else if (status.includes("Hutang")) {
+        } else if (statusUpper.includes("HUTANG")) {
           totalHutang += harga;
           countHutang++;
         }
